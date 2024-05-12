@@ -1,0 +1,37 @@
+.chart {
+    max-width:800px;
+    width:100vw
+}
+.chart input {
+    max-width:200px;
+    width:30vw;
+}
+
+#vos_one_spanish {
+    max-width:93px;
+    width:14vw;
+    margin-right:0;
+}
+#vos_two_spanish {
+    max-width: 93px;
+    width:14vw;
+}
+
+#mandato_header {
+    background-color: gray;
+    color:black;
+}
+
+#mandato_ingles {
+    background-color: gray;
+    color:black;
+}
+
+#mandato_spanish {
+    background-color: gray;
+    color:black;
+}
+#sujeto {
+    background-color: grey;
+    color:black;
+}

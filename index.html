@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="VC_style.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="VC_brains.js"></script>
+        <!-- <script src="levels.json"></script> -->
+        <title>Tablas de Verbos!</title>
+    </head>
+
+    <body>
+        <div class="header">
+            <input type="button" value="Roll subject!" onClick="changeSubject()">
+            <select id="verbSelector" name="verbSelector" onchange="clearScreen()">
+                <option value="acostarse">acostarse</option>
+                <option value="adquirir">adquirir</option>
+                <option value="atraer">atraer</option>
+                <option value="conseguir">conseguir</option>
+                <option value="construir">construir</option>
+                <option value="despedir">despedir</option>
+                <option value="divertirse">divertirse</option>
+                <option value="escoger">escoger</option>
+                <option value="forzar">forzar</option>
+                <option value="freír">freír</option>
+                <option value="elegir">elegir</option>
+                <option value="medir">medir</option>
+                <option value="morir">morir</option>
+                <option value="ofrecer">ofrecer</option>
+                <option value="portarse">portarse</option>
+                <option value="producir">producir</option>
+                <option value="referir">referir</option>
+                <option value="reñir">reñir</option>
+                <option value="sentarse">sentarse</option>
+                <option value="sonreír">sonreír</option>
+                <option value="sentirse">sentirse</option>
+                <option value="sugerir">sugerir</option>
+                <option value="torcer">torcer</option>
+                <option value="vestirse">vestirse</option>
+                <option value="ahogarse">ahogarse</option>
+            </select>
+            <input type="button" value="Check!" onclick="checkChart()">
+            <input type="button" value="Clear" onclick="clearScreen()">
+        </div> <br>
+        <div class="chart">
+            <input type="text" id="sujeto" name="sujeto" disabled="true" value="sujeto-- ">
+            <input type="text" id="esp_header" name="esp_header" disabled="true" value="español">
+            <input type="text" id="ing_header" name="ing_header" disabled="true" value="inglés"> <br>
+
+            <input type="text" id="inf_header" name="inf_header" disabled="true" value="infinitivo">
+            <input type="text" id="inf_spanish" name="inf_spanish">
+            <input type="text" id="inf_ingles" name="inf_ingles"> <br>
+
+            <input type="text" id="ger_header" name="ger_header" disabled="true" value="gerundio">
+            <input type="text" id="ger_spanish" name="ger_spanish">
+            <input type="text" id="ger_ingles" name="ger_ingles"> <br>
+
+            <input type="text" id="part_pas_header" name="part_pas_header" disabled="true" value="participio pasado">
+            <input type="text" id="part_pas_spanish" name="part_pas_spanish">
+            <input type="text" id="part_pas_ingles" name="part_pas_ingles"> <br>
+
+            <input type="text" id="pres_header" name="pres_header" disabled="true" value="presente">
+            <input type="text" id="pres_spanish" name="pres_spanish">
+            <input type="text" id="pres_ingles" name="pres_ingles"> <br>
+
+            <input type="text" id="imp_header" name="imp_header" disabled="true" value="imperfecto">
+            <input type="text" id="imp_spanish" name="imp_spanish">
+            <input type="text" id="imp_ingles" name="imp_ingles"> <br>
+
+            <input type="text" id="pret_header" name="pret_header" disabled="true" value="pretérito">
+            <input type="text" id="pret_spanish" name="pret_spanish">
+            <input type="text" id="pret_ingles" name="pret_ingles"> <br>
+
+            <input type="text" id="pres_perf_header" name="pres_perf_header" disabled="true" value="presente perfecto">
+            <input type="text" id="pres_perf_spanish" name="pres_perf_spanish">
+            <input type="text" id="pres_perf_ingles" name="pres_perf_ingles"> <br>
+
+            <input type="text" id="plu_perf_header" name="plu_perf_header" disabled="true" value="pluscuamperfecto">
+            <input type="text" id="plu_perf_spanish" name="plu_perf_spanish">
+            <input type="text" id="plu_perf_ingles" name="plu_perf_ingles"> <br>
+
+            <input type="text" id="fut_header" name="fut_header" disabled="true" value="futuro">
+            <input type="text" id="fut_spanish" name="fut_spanish">
+            <input type="text" id="fut_ingles" name="fut_ingles"> <br>
+
+            <input type="text" id="fut_perf_header" name="fut_perf_header" disabled="true" value="futuro perfecto">
+            <input type="text" id="fut_perf_spanish" name="fut_perf_spanish">
+            <input type="text" id="fut_perf_ingles" name="fut_perf_ingles"> <br>
+
+            <input type="text" id="cond_header" name="cond_header" disabled="true" value="condicional">
+            <input type="text" id="cond_spanish" name="cond_spanish">
+            <input type="text" id="cond_ingles" name="cond_ingles"> <br>
+
+            <input type="text" id="cond_perf_header" name="cond_perf_header" disabled="true" value="condicional perfecto">
+            <input type="text" id="cond_perf_spanish" name="cond_perf_spanish">
+            <input type="text" id="cond_perf_ingles" name="cond_perf_ingles"> <br>
+
+            <input type="text" id="pres_subj_header" name="pres_subj_header" disabled="true" value="presente del subjuntivo">
+            <input type="text" id="pres_subj_spanish" name="pres_subj_spanish">
+            <input type="text" id="pres_subj_ingles" name="pres_subj_ingles"> <br>
+
+            <input type="text" id="imp_subj_header" name="imp_subj_header" disabled="true" value="imperfecto del subj.">
+            <input type="text" id="imp_subj_spanish" name="imp_subj_spanish">
+            <input type="text" id="imp_subj_ingles" name="imp_subj_ingles"> <br>
+
+            <input type="text" id="pres_perf_subj_header" name="pres_perf_subj_header" disabled="true" value="presente perf. del subj.">
+            <input type="text" id="pres_perf_subj_spanish" name="pres_perf_subj_spanish">
+            <input type="text" id="pres_perf_subj_ingles" name="pres_perf_subj_ingles"> <br>
+
+            <input type="text" id="plu_perf_subj_header" name="plu_perf_subj_header" disabled="true" value="pluscuamperfecto del subj.">
+            <input type="text" id="plu_perf_subj_spanish" name="plu_perf_subj_spanish">
+            <input type="text" id="plu_perf_subj_ingles" name="plu_perf_subj_ingles"> <br>
+
+            <input type="text" id="mandato_header" name="mandato_header" disabled="true" value="MANDATOS">
+            <input type="text" id="mandato_spanish" name="mandato_spanish" disabled="true">
+            <input type="text" id="mandato_ingles" name="mandato_ingles" disabled="true"> <br>
+
+            <input type="text" id="tu_pos_header" name="tu_pos_header" disabled="true" value="Tú (+)">
+            <input type="text" id="tu_pos_spanish" name="tu_pos_spanish">
+            <input type="text" id="tu_pos_ingles" name="tu_pos_ingles"> <br>
+
+            <input type="text" id="tu_neg_header" name="tu_neg_header" disabled="true" value="Tú (-)">
+            <input type="text" id="tu_neg_spanish" name="tu_neg_spanish">
+            <input type="text" id="tu_neg_ingles" name="tu_neg_ingles"> <br>
+
+            <input type="text" id="ud_header" name="ud_header" disabled="true" value="Ud.">
+            <input type="text" id="ud_spanish" name="ud_spanish">
+            <input type="text" id="ud_ingles" name="ud_ingles"> <br>
+
+            <input type="text" id="uds_header" name="uds_header" disabled="true" value="Uds.">
+            <input type="text" id="uds_spanish" name="uds_spanish">
+            <input type="text" id="uds_ingles" name="uds_ingles"> <br>
+
+            <input type="text" id="vos_header" name="vos_header" disabled="true" value="Vosotros (-/+)">
+            <input type="text" id="vos_one_spanish" name="vos_one_spanish">
+            <input type="text" id="vos_two_spanish" name="vos_two_spanish">
+            <input type="text" id="vos_ingles" name="vos_ingles"> <br>
+
+            <input type="text" id="nos_header" name="nos_header" disabled="true" value="Nosotros">
+            <input type="text" id="nos_spanish" name="nos_spanish">
+            <input type="text" id="nos_ingles" name="nos_ingles"> <br>
+        </div>
+        <script>init()</script>
+    </body>
+
+</html>
