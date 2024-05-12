@@ -392,23 +392,28 @@ function getSolution() {
             var eng_ans = document.getElementById(order[i] + "_ingles").value;
             if(span_ans == null || !spanish[i].includes(span_ans.toLowerCase())) {
                 document.getElementById(order[i] + "_one_spanish").value += " **" + spanish[i][0] + "**";
+                document.getElementById(order[i] + "_one_spanish").style.color = "red";
             }
             if(eng_ans == null || !english[i].includes(eng_ans.toLowerCase())) {
                 document.getElementById(order[i] + "_ingles").value += " **" + english[i][0] + "**";
+                document.getElementById(order[i] + "_ingles").style.color = "red";
             }
         } else if(i == 21) {
             var span_ans = document.getElementById(order[i] + "_two_spanish").value;
             if(span_ans == null || !spanish[i].includes(span_ans.toLowerCase())) {
                 document.getElementById(order[i] + "_two_spanish").value += " **" + spanish[i][0] + "**";
+                document.getElementById(order[i] + "_two_spanish").style.color = "red";
             }
         } else {
             var span_ans = document.getElementById(order[i] + "_spanish").value;
             var eng_ans = document.getElementById(order[i] + "_ingles").value;
             if(span_ans == null || !spanish[i].includes(span_ans.toLowerCase())) {
                 document.getElementById(order[i] + "_spanish").value += " **" + spanish[i][0] + "**";
+                document.getElementById(order[i] + "_spanish").style.color = "red";
             }
             if(eng_ans == null || !english[i].includes(eng_ans.toLowerCase())) {
                 document.getElementById(order[i] + "_ingles").value += " **" + english[i][0] + "**";
+                document.getElementById(order[i] + "_ingles").style.color = "red";
             }
         }
     }
@@ -640,7 +645,7 @@ function getAttributes(verb) {
         case "sugerir":
             return [2, false, 1, {}, [["suggest", "suggesting", "suggested", "suggested"]]];
         case "torcer":
-            return [1, false, 3, {"yo":"tuerz"}, [["twist", "twisting", "twisted", "twist"]]];
+            return [1, false, 3, {"yo":"tuerz", "participle":["torcido", "tuerto"]}, [["twist", "twisting", "twisted", "twist"]]];
         case "vestirse":
             return [2, true, 2, {}, [["get dressed", "getting dressed", "gotten dressed", "got dressed"]]];
         case "ahogarse":
@@ -662,11 +667,18 @@ function clearScreen() {
         if(i == 20) {
             document.getElementById(order[i] + "_one_spanish").value = "";
             document.getElementById(order[i] + "_ingles").value = "";
+
+            document.getElementById(order[i] + "_one_spanish").style.color = "black";
+            document.getElementById(order[i] + "_ingles").style.color = "black";
         } else if(i == 21) {
             document.getElementById(order[i] + "_two_spanish").value = "";
+            document.getElementById(order[i] + "_two_spanish").style.color = "black";
         } else {
             document.getElementById(order[i] + "_spanish").value = "";
-            document.getElementById(order[i] + "_ingles").value = ""
+            document.getElementById(order[i] + "_ingles").value = "";
+
+            document.getElementById(order[i] + "_spanish").style.color = "black";
+            document.getElementById(order[i] + "_ingles").style.color = "black";
         }
     }
 }
