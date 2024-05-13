@@ -343,79 +343,89 @@ function getSolution() {
     }
     for(var i =0; i < attr[4].length; i++) {
         var curr_ops = attr[4][i];
-        english[0].push("to " + curr_ops[0]);
-        english[1].push(curr_ops[1]);
-        english[2].push(curr_ops[2]);
-        english[3].push(e_subs[sujeto] + " " + curr_ops[0]);
-        english[4].push(e_subs[sujeto] + " used to " + curr_ops[0]);
+        english[0].push(new RegExp("to " + curr_ops[0]));
+        english[1].push(new RegExp(curr_ops[1]));
+        english[2].push(new RegExp(curr_ops[2]));
+        if(sujeto == 2) {
+            english[3].push(new RegExp(e_subs[sujeto] + " " + curr_ops[0] + "s"));
+        } else {
+            english[3].push(new RegExp(e_subs[sujeto] + " " + curr_ops[0]));
+        }
+        
+        english[4].push(new RegExp(e_subs[sujeto] + " used to " + curr_ops[0]));
         if(sujeto == 0 || sujeto == 2) {
-            english[4].push(e_subs[sujeto] + " was " + curr_ops[1]);
+            english[4].push(new RegExp(e_subs[sujeto] + " was " + curr_ops[1]));
         } else {
-            english[4].push(e_subs[sujeto] + " were " + curr_ops[1]);
+            english[4].push(new RegExp(e_subs[sujeto] + " were " + curr_ops[1]));
         }
-        english[5].push(e_subs[sujeto] + " " + curr_ops[3]);
+        english[5].push(new RegExp(e_subs[sujeto] + " " + curr_ops[3]));
         if(sujeto != 2) {
-            english[6].push(e_subs[sujeto] + " have " + curr_ops[2]);
+            english[6].push(new RegExp(e_subs[sujeto] + " have " + curr_ops[2]));
         } else {
-            english[6].push(e_subs[sujeto] + " has " + curr_ops[2]);
+            english[6].push(new RegExp(e_subs[sujeto] + " has " + curr_ops[2]));
         }
-        english[7].push(e_subs[sujeto] + " had " + curr_ops[2]);
-        english[8].push(e_subs[sujeto] + " will " + curr_ops[0]);
-        english[9].push(e_subs[sujeto] + " will have " + curr_ops[2]);
-        english[10].push(e_subs[sujeto] + " would " + curr_ops[0]);
-        english[11].push(e_subs[sujeto] + " would have " + curr_ops[2]);
-        english[11].push(e_subs[sujeto] + " would've " + curr_ops[2]);
-        english[12].push("that " + e_subs[sujeto] + " " + curr_ops[0]);
-        english[13].push("that " + e_subs[sujeto] + " " + curr_ops[3]);
-        english[13].push("that " + e_subs[sujeto] + " were " + curr_ops[1]);
-        english[14].push("that " + e_subs[sujeto] + " have " + curr_ops[2]);
-        english[15].push("that " + e_subs[sujeto] + " had " + curr_ops[2]);
-        english[16].push(curr_ops[0] + "!");
-        english[16].push(curr_ops[0]);
-        english[17].push("don't " + curr_ops[0] + "!");
-        english[17].push("don't " + curr_ops[0]);
-        english[18].push(curr_ops[0] + "!");
-        english[18].push(curr_ops[0]);
-        english[19].push(curr_ops[0] + "!");
-        english[19].push(curr_ops[0]);
-        english[20].push("(don't) " + curr_ops[0] + "!");
-        english[20].push("(don't) " + curr_ops[0]);
-        english[22].push("let's " + curr_ops[0] + "!");
-        english[22].push("let's " + curr_ops[0]);    
+        english[7].push(new RegExp(e_subs[sujeto] + " had " + curr_ops[2]));
+        english[8].push(new RegExp(e_subs[sujeto] + " will " + curr_ops[0]));
+        english[9].push(new RegExp(e_subs[sujeto] + " will have " + curr_ops[2]));
+        english[10].push(new RegExp(e_subs[sujeto] + " would " + curr_ops[0]));
+        english[11].push(new RegExp(e_subs[sujeto] + " would have " + curr_ops[2]));
+        english[11].push(new RegExp(e_subs[sujeto] + " would.ve " + curr_ops[2]));
+        english[12].push(new RegExp("that " + e_subs[sujeto] + " " + curr_ops[0]));
+        english[13].push(new RegExp("that " + e_subs[sujeto] + " " + curr_ops[3]));
+        english[13].push(new RegExp("that " + e_subs[sujeto] + " were " + curr_ops[1]));
+        english[14].push(new RegExp("that " + e_subs[sujeto] + " have " + curr_ops[2]));
+        english[15].push(new RegExp("that " + e_subs[sujeto] + " had " + curr_ops[2]));
+        english[16].push(new RegExp(curr_ops[0] + "!?"));
+        english[17].push(new RegExp("don.t " + curr_ops[0] + "!?"));
+        english[18].push(new RegExp(curr_ops[0] + "!?"));
+        english[19].push(new RegExp(curr_ops[0] + "!?"));
+        english[20].push(new RegExp("\\(don.t\\) " + curr_ops[0] + "!?"));
+        english[20].push(new RegExp("don.t " + curr_ops[0] + "/" + curr_ops[0] + "!?"));
+        english[20].push(new RegExp(curr_ops[0] + "/" + "don.t " + curr_ops[0] + "!?"));
+        english[22].push(new RegExp("let.s " + curr_ops[0] + "!?"));
     }
     var order = ["inf", "ger", "part_pas", "pres", "imp", "pret", "pres_perf", "plu_perf", "fut", "fut_perf", "cond", "cond_perf", "pres_subj", 
     "imp_subj", "pres_perf_subj", "plu_perf_subj", "tu_pos", "tu_neg", "ud", "uds", "vos", "vos", "nos"];
 
+    var changed = false;
     for(var i = 0; i < order.length; i++) {
         if(i == 20) {
             var span_ans = document.getElementById(order[i] + "_one_spanish").value;
             var eng_ans = document.getElementById(order[i] + "_ingles").value;
-            if(span_ans == null || !spanish[i].includes(span_ans.toLowerCase())) {
+            if(span_ans == null || !spanish[i].includes(span_ans.toLowerCase().trim())) {
                 document.getElementById(order[i] + "_one_spanish").value += " **" + spanish[i][0] + "**";
                 document.getElementById(order[i] + "_one_spanish").style.color = "red";
+                changed = true;
             }
-            if(eng_ans == null || !english[i].includes(eng_ans.toLowerCase())) {
-                document.getElementById(order[i] + "_ingles").value += " **" + english[i][0] + "**";
+            if(eng_ans == null || !english[i].some(elem => elem.test(eng_ans.toLowerCase().trim()))) {
+                document.getElementById(order[i] + "_ingles").value += " **" + english[i][0].source.replace(".", "'").replace("?", "").replace(/\\/g, "") + "**";
                 document.getElementById(order[i] + "_ingles").style.color = "red";
+                changed = true;
             }
         } else if(i == 21) {
             var span_ans = document.getElementById(order[i] + "_two_spanish").value;
-            if(span_ans == null || !spanish[i].includes(span_ans.toLowerCase())) {
+            if(span_ans == null || !spanish[i].includes(span_ans.toLowerCase().trim())) {
                 document.getElementById(order[i] + "_two_spanish").value += " **" + spanish[i][0] + "**";
                 document.getElementById(order[i] + "_two_spanish").style.color = "red";
+                changed = true;
             }
         } else {
             var span_ans = document.getElementById(order[i] + "_spanish").value;
             var eng_ans = document.getElementById(order[i] + "_ingles").value;
-            if(span_ans == null || !spanish[i].includes(span_ans.toLowerCase())) {
+            if(span_ans == null || !spanish[i].includes(span_ans.toLowerCase().trim())) {
                 document.getElementById(order[i] + "_spanish").value += " **" + spanish[i][0] + "**";
                 document.getElementById(order[i] + "_spanish").style.color = "red";
+                changed = true;
             }
-            if(eng_ans == null || !english[i].includes(eng_ans.toLowerCase())) {
-                document.getElementById(order[i] + "_ingles").value += " **" + english[i][0] + "**";
+            if(eng_ans == null || !english[i].some(elem => elem.test(eng_ans.toLowerCase().trim()))) {
+                document.getElementById(order[i] + "_ingles").value += " **" + english[i][0].source.replace(".", "'").replace("?", "").replace(/\\/g, "") + "**";
                 document.getElementById(order[i] + "_ingles").style.color = "red";
+                changed = true;
             }
         }
+    }
+    if(!changed) {
+        alert("¡Perfecto!");
     }
 }
 
@@ -625,7 +635,7 @@ function getAttributes(verb) {
         case "medir":
             return [2, false, 2, {}, [["measure", "measuring", "measured", "measured"]]];
         case "morir":
-            return [2, false, 3, {}, [["die", "dying", "died", "died"]]];
+            return [2, false, 3, {"participle":"muerto"}, [["die", "dying", "died", "died"]]];
         case "ofrecer":
             return [1, false, 0, {"yo":"ofrezc"}, [["offer", "offering", "offered", "offered"]]];
         case "portarse":
