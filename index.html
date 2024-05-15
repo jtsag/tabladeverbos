@@ -12,6 +12,7 @@
     <body>
         <div class="header">
             <input type="button" value="Roll subject!" onClick="changeSubject()">
+            <input type="button" value="Clear" onclick="clearScreen()">
             <select id="verbSelector" name="verbSelector" onchange="clearScreen()">
                 <option value="acostarse">acostarse</option>
                 <option value="adquirir">adquirir</option>
@@ -40,7 +41,6 @@
                 <option value="ahogarse">ahogarse</option>
             </select>
             <input type="button" value="Check!" onclick="checkChart()">
-            <input type="button" value="Clear" onclick="clearScreen()">
         </div> <br>
         <div class="chart">
             <input type="text" id="sujeto" name="sujeto" disabled="true" value="sujeto-- ">
