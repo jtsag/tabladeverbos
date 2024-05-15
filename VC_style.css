@@ -3,18 +3,14 @@
     width:100vw
 }
 .chart input {
-    max-width:200px;
-    width:30vw;
+    width:30%;
 }
 
 #vos_one_spanish {
-    max-width:93px;
-    width:14vw;
-    margin-right:0;
+    width:14%;
 }
 #vos_two_spanish {
-    max-width: 93px;
-    width:14vw;
+    width:14%;
 }
 
 #mandato_header {
