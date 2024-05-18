@@ -27,7 +27,6 @@ function init() {
 }
 
 function changeSubject() {
-    clearScreen();
     sujeto = Math.floor(Math.random() * 5);
     switch(sujeto) {
         case 0:
