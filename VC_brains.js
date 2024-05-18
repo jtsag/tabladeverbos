@@ -37,7 +37,7 @@ function changeSubject() {
             document.getElementById("sujeto").value = "sujeto--tú";
             break;
         case 2:
-            document.getElementById("sujeto").value = "sujeto--él/ella";
+            document.getElementById("sujeto").value = "sujeto--él";
             break;
         case 3:
             document.getElementById("sujeto").value = "sujeto--nosotros";
