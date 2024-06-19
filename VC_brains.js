@@ -542,7 +542,7 @@ function getEllos(stem, attr, sujeto) {
             pret = pret.substring(0, start) + pret.substring(end);
         } else if(pret.substring(start, end) == "a" || pret.substring(start, end) == "e" || pret.substring(start, end) == "u" && 
                 pret.substring(start - 1, start) != "q" && pret.substring(start-1, start) != "g") {
-            pret = pret.substring(0, pret.length - idx) + "y" + pret.substring(pret.length - idx + 2);
+            pret = pret.substring(0, pret.length - idx + 1) + "y" + pret.substring(pret.length - idx + 2);
         }
     }
     if(attr[3]["pret"] != null) {
