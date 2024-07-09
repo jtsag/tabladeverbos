@@ -10,6 +10,7 @@ var haber_subj;
 var haber_imp_subj;
 var e_subs;
 var verbo;
+var level;
 
 function init() {
     sujeto = -1;
@@ -24,9 +25,11 @@ function init() {
     haber_imp_subj = [["hubiera", "hubieras", "hubiera", "hubiéramos", "hubieran"], ["hubiese", "hubieses", "hubiese", "hubiésemos", "hubiesen"]]
     imp_subj_endings = [["ra", "ras", "ra", "ramos", "ran"], ["se", "ses", "se", "semos", "sen"]]
     e_subs = ["i", "you", "he", "we", "they"];
+    level = 5;
 }
 
 function changeSubject() {
+    clearScreen();
     sujeto = Math.floor(Math.random() * 5);
     switch(sujeto) {
         case 0:
@@ -113,20 +116,26 @@ function getSolution() {
     }
     spanish.push(part);
 
+    //present
     var pres;
-    if(sujeto == 3) {
-        if(attr[0] == 2 && stem.substring(stem.length - 1) == "e") {
-            pres = stem + "ímos";
-        } else {
-            pres = stem + pres_endings[attr[0]][sujeto];
-        }
-    } else if(sujeto == 0) {
-        pres = getYo(stem, attr);
-    }else {
-        if(attr[3]["boot"] == null) {
-            pres = stemChange(stem, attr[2], false) + pres_endings[attr[0]][sujeto];    
-        } else {
-            pres = attr[3]["boot"] + pres_endings[attr[0]][sujeto];
+    if(attr[3]["pres"] != null) {
+        pres = attr[3]["pres"][sujeto];
+    }
+    else { 
+        if(sujeto == 3) {
+            if(attr[0] == 2 && stem.substring(stem.length - 1) == "e") {
+                pres = stem + "ímos";
+            } else {
+                pres = stem + pres_endings[attr[0]][sujeto];
+            }
+        } else if(sujeto == 0) {
+            pres = getYo(stem, attr);
+        }else {
+            if(attr[3]["boot"] == null) {
+                pres = stemChange(stem, attr[2], false) + pres_endings[attr[0]][sujeto];    
+            } else {
+                pres = attr[3]["boot"] + pres_endings[attr[0]][sujeto];
+            }
         }
     }
     if(attr[1]) {
@@ -135,10 +144,15 @@ function getSolution() {
     spanish.push(pres);
 
     //imperfect
-    var suj_idx = attr[0] == 0? 0:1;
-    var imp = stem + imp_endings[suj_idx][sujeto];
-    if(attr[1]) {
-        imp = reflexive_pronouns[sujeto] +" "+ imp;
+    var imp;
+    if(attr[3]["imp"] != null) {
+        imp = attr[3]["imp"][sujeto];
+    } else {
+        var suj_idx = attr[0] == 0? 0:1;
+        imp = stem + imp_endings[suj_idx][sujeto];
+        if(attr[1]) {
+            imp = reflexive_pronouns[sujeto] +" "+ imp;
+        }
     }
     spanish.push(imp);
 
@@ -146,6 +160,9 @@ function getSolution() {
     var pret;
     if(sujeto == 2 || sujeto == 4) {
         pret = getEllos(stem, attr, sujeto);
+        if(attr[1]) {
+            pret = "se " + pret;
+        }
     } else {
         if(attr[3]["pret"] == null) {
             if(sujeto == 0 && attr[0] == 0) {
@@ -233,7 +250,7 @@ function getSolution() {
     var imp_subj = getEllos(stem, attr, 4);
     imp_subj = imp_subj.substring(0, imp_subj.length - 3);
     if(attr[1]) {
-        imp_subj = imp_subj.substring(3);
+        // imp_subj = imp_subj.substring(3);
         imp_subj = reflexive_pronouns[sujeto] + " " + imp_subj;
     }
     if(sujeto == 3) {
@@ -261,21 +278,29 @@ function getSolution() {
 
     // Tu +
     var tup;
-    if(attr[3]["boot"] == null) {
-        tup = stemChange(stem, attr[2], false);    
-    } else {
-        tup = attr[3]["boot"];
+    if(attr[3]["command"] != null) {
+        tup = attr[3]["command"];
     }
-    if(attr[1]) {
-        tup = addAccent(tup);
-        tup += pres_endings[attr[0]][2] + reflexive_pronouns[1];
-    } else {
-        tup += pres_endings[attr[0]][2];
+    else if(attr[3]["pres"] != null) {
+        tup = attr[3]["pres"][2];
     }
-    spanish.push(tup);
+    else {
+        if(attr[3]["boot"] == null) {
+            tup = stemChange(stem, attr[2], false);    
+        } else {
+            tup = attr[3]["boot"];
+        }
+        if(attr[1]) {
+            tup = addAccent(tup);
+            tup += pres_endings[attr[0]][2] + reflexive_pronouns[1];
+        } else {
+            tup += pres_endings[attr[0]][2];
+        }
+    }
+    spanish.push([tup, "¡" + tup + "!"]);
 
     //tun
-    spanish.push("no " + getPresSubj(stem, attr, 1));
+    spanish.push(["no " + getPresSubj(stem, attr, 1), "¡" + "no " + getPresSubj(stem, attr, 1) + "!"]);
 
     //ud
     var base_ud = getPresSubj(stem, attr, 2);
@@ -284,7 +309,7 @@ function getSolution() {
         base_ud = base_ud.substring(3, base_ud.length - 1);
         base_ud = addAccent(base_ud) + temp + "se";
     }
-    spanish.push(base_ud);
+    spanish.push([base_ud, "¡" + base_ud + "!"]);
 
     //uds
     var base_uds = getPresSubj(stem, attr, 4);
@@ -293,7 +318,7 @@ function getSolution() {
         base_uds = base_uds.substring(3, base_uds.length - 2);
         base_uds = addAccent(base_uds) + temp + "se";
     }
-    spanish.push(base_uds);
+    spanish.push([base_uds, "¡" + base_uds + "!"]);
 
     //vosotros
     var vosn = "no " + getPresSubj(stem, attr, 5);
@@ -305,20 +330,25 @@ function getSolution() {
             vosp = vosp.substring(0, vosp.length - 1) + "os";
         }
     }
-    spanish.push([vosn, vosp]);
-    spanish.push([vosp, vosn]);
+    spanish.push([vosn, vosp, "¡" + vosn + "!", "¡" + vosp + "!"]);
+    spanish.push([vosp, vosn, "¡" + vosp + "!", "¡" + vosn + "!"]);
 
     //nosotros
-    var nosotros = getPresSubj(stem, attr, 3);
-    if(attr[1]) {
-        nosotros = nosotros.substring(4, nosotros.length - 3);
-        if(nosotros.substring(nosotros.length - 1) == "a") {
-            nosotros = nosotros.substring(0, nosotros.length - 1) + "ámonos";
-        } else if(nosotros.substring(nosotros.length - 1) == "e") {
-            nosotros = nosotros.substring(0, nosotros.length - 1) + "émonos";
+    var nosotros;
+    if(attr[3]["nos"] != null) {
+        nosotros = attr[3]["nos"];
+    } else {
+        nosotros = getPresSubj(stem, attr, 3);
+        if(attr[1]) {
+            nosotros = nosotros.substring(4, nosotros.length - 3);
+            if(nosotros.substring(nosotros.length - 1) == "a") {
+                nosotros = nosotros.substring(0, nosotros.length - 1) + "ámonos";
+            } else if(nosotros.substring(nosotros.length - 1) == "e") {
+                nosotros = nosotros.substring(0, nosotros.length - 1) + "émonos";
+            }
         }
     }
-    spanish.push(nosotros);
+    spanish.push([nosotros, "¡" + nosotros + "!"]);
     
     for(var i = 0; i < spanish.length; i++) {
         var obj = spanish[i];
@@ -342,90 +372,199 @@ function getSolution() {
     }
     for(var i =0; i < attr[4].length; i++) {
         var curr_ops = attr[4][i];
-        english[0].push(new RegExp("to " + curr_ops[0]));
-        english[1].push(new RegExp(curr_ops[1]));
-        english[2].push(new RegExp(curr_ops[2]));
-        if(sujeto == 2) {
-            english[3].push(new RegExp(e_subs[sujeto] + " " + curr_ops[0] + "s"));
+        var be = false;
+        var go = false;
+        var have = false;
+        var space = false;
+        if(curr_ops[0] == "be worth" || curr_ops[0] == "be") {
+            be = true;
+        } else if(curr_ops[0] == "go to bed" || curr_ops[0] == "go") {
+            go = true;
+        } else if(curr_ops[0] == "have" || curr_ops[0] == "have fun") {
+            have = true;
+        } else if(curr_ops[0].indexOf(" ") != -1) {
+            space = true;
+        }
+        english[0].push(new RegExp("^" + "to " + curr_ops[0] + "$"));
+        english[1].push(new RegExp("^" + curr_ops[1] + "$"));
+        english[2].push(new RegExp("^" + curr_ops[2] + "$"));
+        if(go) {
+            if(sujeto == 2) {
+                english[3].push(new RegExp("^" + e_subs[sujeto] + " goes" + curr_ops[0].substring(2) + "$"));
+            } else {
+                english[3].push(new RegExp("^" + e_subs[sujeto] + " " + curr_ops[0] + "$"));
+            }
+        } else if(have) {
+            if(sujeto == 2) {
+                english[3].push(new RegExp("^" + e_subs[sujeto] + " has" + curr_ops[0].substring(4) + "$"));
+            } else {
+                english[3].push(new RegExp("^" + e_subs[sujeto] + " " + curr_ops[0] + "$"));
+            }
+        } else if(space) {
+            if(sujeto == 2) {
+                english[3].push(new RegExp("^" + e_subs[sujeto] + " " + curr_ops[0].substring(0, curr_ops[0].indexOf(" ")) + "s" + curr_ops[0].substring(curr_ops[0].indexOf(" ")) + "$"));
+            } else {
+                english[3].push(new RegExp("^" + e_subs[sujeto] + " " + curr_ops[0] + "$"));
+            }
         } else {
-            english[3].push(new RegExp(e_subs[sujeto] + " " + curr_ops[0]));
+            if(sujeto == 0 && be) {
+                english[3].push(new RegExp("^" + e_subs[sujeto] + " am" + curr_ops[0].substring(2) + "$"));
+            } else if(sujeto == 2) {
+                if(be) {
+                    english[3].push(new RegExp("^" + e_subs[sujeto] + " is" + curr_ops[0].substring(2) + "$"));
+                } else {
+                    english[3].push(new RegExp("^" + e_subs[sujeto] + " " + curr_ops[0] + "s" + "$"));
+                }
+            } else if(be && (sujeto == 1 || sujeto == 3 || sujeto == 4)) {
+                english[3].push(new RegExp("^" + e_subs[sujeto] + " are" + curr_ops[0].substring(2) + "$"));
+            } else {
+                english[3].push(new RegExp("^" + e_subs[sujeto] + " " + curr_ops[0] + "$"));
+            }
         }
         
-        english[4].push(new RegExp(e_subs[sujeto] + " used to " + curr_ops[0]));
-        if(sujeto == 0 || sujeto == 2) {
-            english[4].push(new RegExp(e_subs[sujeto] + " was " + curr_ops[1]));
-        } else {
-            english[4].push(new RegExp(e_subs[sujeto] + " were " + curr_ops[1]));
+        english[4].push(new RegExp("^" + e_subs[sujeto] + " used to " + curr_ops[0] + "$"));
+        if(!be) {    
+            if(sujeto == 0 || sujeto == 2) {
+                english[4].push(new RegExp("^" + e_subs[sujeto] + " was " + curr_ops[1] + "$"));
+            } else {
+                english[4].push(new RegExp("^" + e_subs[sujeto] + " were " + curr_ops[1] + "$"));
+            }
         }
-        english[5].push(new RegExp(e_subs[sujeto] + " " + curr_ops[3]));
+        if(be && (sujeto == 1 || sujeto == 3 || sujeto == 4)) {
+            english[5].push(new RegExp("^" + e_subs[sujeto] + " were" + curr_ops[0].substring(2) + "$"))
+        } else {
+            english[5].push(new RegExp("^" + e_subs[sujeto] + " " + curr_ops[3] + "$"));
+        }
         if(sujeto != 2) {
-            english[6].push(new RegExp(e_subs[sujeto] + " have " + curr_ops[2]));
+            english[6].push(new RegExp("^" + e_subs[sujeto] + " have " + curr_ops[2] + "$"));
         } else {
-            english[6].push(new RegExp(e_subs[sujeto] + " has " + curr_ops[2]));
+            english[6].push(new RegExp("^" + e_subs[sujeto] + " has " + curr_ops[2] + "$"));
         }
-        english[7].push(new RegExp(e_subs[sujeto] + " had " + curr_ops[2]));
-        english[8].push(new RegExp(e_subs[sujeto] + " will " + curr_ops[0]));
-        english[9].push(new RegExp(e_subs[sujeto] + " will have " + curr_ops[2]));
-        english[10].push(new RegExp(e_subs[sujeto] + " would " + curr_ops[0]));
-        english[11].push(new RegExp(e_subs[sujeto] + " would have " + curr_ops[2]));
-        english[11].push(new RegExp(e_subs[sujeto] + " would.ve " + curr_ops[2]));
-        english[12].push(new RegExp("that " + e_subs[sujeto] + " " + curr_ops[0]));
-        english[13].push(new RegExp("that " + e_subs[sujeto] + " " + curr_ops[3]));
-        english[13].push(new RegExp("that " + e_subs[sujeto] + " were " + curr_ops[1]));
-        english[14].push(new RegExp("that " + e_subs[sujeto] + " have " + curr_ops[2]));
-        english[15].push(new RegExp("that " + e_subs[sujeto] + " had " + curr_ops[2]));
-        english[16].push(new RegExp(curr_ops[0] + "!?"));
-        english[17].push(new RegExp("don.t " + curr_ops[0] + "!?"));
-        english[18].push(new RegExp(curr_ops[0] + "!?"));
-        english[19].push(new RegExp(curr_ops[0] + "!?"));
-        english[20].push(new RegExp("\\(don.t\\) " + curr_ops[0] + "!?"));
-        english[20].push(new RegExp("don.t " + curr_ops[0] + "/" + curr_ops[0] + "!?"));
-        english[20].push(new RegExp(curr_ops[0] + "/" + "don.t " + curr_ops[0] + "!?"));
-        english[22].push(new RegExp("let.s " + curr_ops[0] + "!?"));
+        english[7].push(new RegExp("^" + e_subs[sujeto] + " had " + curr_ops[2] + "$"));
+        english[8].push(new RegExp("^" + e_subs[sujeto] + " will " + curr_ops[0] + "$"));
+        english[9].push(new RegExp("^" + e_subs[sujeto] + " will have " + curr_ops[2] + "$"));
+        english[10].push(new RegExp("^" + e_subs[sujeto] + " would " + curr_ops[0] + "$"));
+        english[11].push(new RegExp("^" + e_subs[sujeto] + " would have " + curr_ops[2] + "$"));
+        english[11].push(new RegExp("^" + e_subs[sujeto] + " would.ve " + curr_ops[2] + "$"));
+        english[12].push(new RegExp("^" + "that " + e_subs[sujeto] + " " + curr_ops[0] + "$"));
+        if(!be) {
+            english[13].push(new RegExp("^" + "that " + e_subs[sujeto] + " were " + curr_ops[1] + "$"));
+        }
+        if(curr_ops[4] != null) {
+            english[13].push(new RegExp("^" + "that " + e_subs[sujeto] + " " + curr_ops[4] + "$"));
+        } else {
+            english[13].push(new RegExp("^" + "that " + e_subs[sujeto] + " " + curr_ops[3] + "$"))
+        }
+        english[14].push(new RegExp("^" + "that " + e_subs[sujeto] + " have " + curr_ops[2] + "$"));
+        english[15].push(new RegExp("^" + "that " + e_subs[sujeto] + " had " + curr_ops[2] + "$"));
+        english[16].push(new RegExp("^" + curr_ops[0] + "!?" + "$"));
+        english[17].push(new RegExp("^" + "don.t " + curr_ops[0] + "!?" + "$"));
+        english[18].push(new RegExp("^" + curr_ops[0] + "!?" + "$"));
+        english[19].push(new RegExp("^" + curr_ops[0] + "!?" + "$"));
+        english[20].push(new RegExp("^" + "\\(don.t\\) " + curr_ops[0] + "!?" + "$"));
+        english[20].push(new RegExp("^" + "don.t " + curr_ops[0] + "/" + curr_ops[0] + "!?" + "$"));
+        english[20].push(new RegExp("^" + curr_ops[0] + "/" + "don.t " + curr_ops[0] + "!?" + "$"));
+        english[22].push(new RegExp("^" + "let.s " + curr_ops[0] + "!?" + "$"));
     }
     var order = ["inf", "ger", "part_pas", "pres", "imp", "pret", "pres_perf", "plu_perf", "fut", "fut_perf", "cond", "cond_perf", "pres_subj", 
     "imp_subj", "pres_perf_subj", "plu_perf_subj", "tu_pos", "tu_neg", "ud", "uds", "vos", "vos", "nos"];
 
     var changed = false;
     for(var i = 0; i < order.length; i++) {
-        if(i == 20) {
-            var span_ans = document.getElementById(order[i] + "_one_spanish").value;
-            var eng_ans = document.getElementById(order[i] + "_ingles").value;
-            if(span_ans == null || !spanish[i].includes(span_ans.toLowerCase().trim())) {
-                document.getElementById(order[i] + "_one_spanish").value += " **" + spanish[i][0] + "**";
-                document.getElementById(order[i] + "_one_spanish").style.color = "red";
-                changed = true;
-            }
-            if(eng_ans == null || !english[i].some(elem => elem.test(eng_ans.toLowerCase().trim()))) {
-                document.getElementById(order[i] + "_ingles").value += " **" + english[i][0].source.replace(".", "'").replace("?", "").replace(/\\/g, "") + "**";
-                document.getElementById(order[i] + "_ingles").style.color = "red";
-                changed = true;
-            }
-        } else if(i == 21) {
-            var span_ans = document.getElementById(order[i] + "_two_spanish").value;
-            if(span_ans == null || !spanish[i].includes(span_ans.toLowerCase().trim())) {
-                document.getElementById(order[i] + "_two_spanish").value += " **" + spanish[i][0] + "**";
-                document.getElementById(order[i] + "_two_spanish").style.color = "red";
-                changed = true;
-            }
-        } else {
-            var span_ans = document.getElementById(order[i] + "_spanish").value;
-            var eng_ans = document.getElementById(order[i] + "_ingles").value;
-            if(span_ans == null || !spanish[i].includes(span_ans.toLowerCase().trim())) {
-                document.getElementById(order[i] + "_spanish").value += " **" + spanish[i][0] + "**";
-                document.getElementById(order[i] + "_spanish").style.color = "red";
-                changed = true;
-            }
-            if(eng_ans == null || !english[i].some(elem => elem.test(eng_ans.toLowerCase().trim()))) {
-                document.getElementById(order[i] + "_ingles").value += " **" + english[i][0].source.replace(".", "'").replace("?", "").replace(/\\/g, "") + "**";
-                document.getElementById(order[i] + "_ingles").style.color = "red";
-                changed = true;
-            }
+        var span_name = order[i];
+        switch(i) {
+            case 20:
+                span_name += "_one_spanish";
+                break;
+            case 21:
+                span_name += "_two_spanish";
+                break;
+            default:
+                span_name +="_spanish";
+                break;
+        }
+        var eng_name = order[i] + "_ingles";
+        var span_ans = document.getElementById(span_name).value;
+        var eng_ans = document.getElementById(eng_name).value;
+        
+        span_ans = span_ans == null? "" : span_ans.toLowerCase().trim();
+        eng_ans = eng_ans == null? "" : eng_ans.toLowerCase().trim();
+
+        if(span_ans == "" || !spanish[i].includes(span_ans)) {
+            var most_similar;
+            do {
+                most_similar = getMostSimilar(span_ans, spanish[i]);
+                spanish[i] = spanish[i].filter(item => item != most_similar)
+            } while(i == 21 && document.getElementById("vos_one_spanish").value.indexOf(most_similar) != -1 && spanish[i].length > 0)
+            document.getElementById(span_name).value += " **" + most_similar + "**";
+            document.getElementById(span_name).style.color = "red";
+            changed = true;
+        }
+        if(i != 21 && (eng_ans == "" || !english[i].some(elem => elem.test(eng_ans)))) {
+            document.getElementById(eng_name).value += " **" + getMostSimilar(eng_ans, english[i]) + "**";
+            document.getElementById(eng_name).style.color = "red";
+            changed = true;
         }
     }
     if(!changed) {
         alert("¡Perfecto!");
     }
+}
+
+function getMostSimilar(input, answers) {
+    var minDist = 999;
+    var minIdx = -1;
+    var minLength = 999;
+    for(var i = 0; i < answers.length; i++) {
+        var curr_ans;
+        if(answers[i] instanceof RegExp) {
+            curr_ans = cleanString(answers[i].source);
+        } else  {
+            curr_ans = answers[i];
+        }
+        if(curr_ans.length < minLength) {
+            minLength = curr_ans.length;
+        }
+        var sim_score = similarity(curr_ans, input);
+        if(sim_score < minDist) {
+            minDist = sim_score;
+            minIdx = i;
+        }
+    }
+    if(minDist == minLength)  {
+        return answers[0] instanceof RegExp? cleanString(answers[0].source) : answers[0];
+    } else {
+        return answers[minIdx] instanceof RegExp? cleanString(answers[minIdx].source) : answers[minIdx];
+    }
+}
+
+function cleanString(str) {
+    return str.replace(".", "'").replace("?", "").replace(/\\/g, "").replace("^", "").replace("$", "");
+}
+
+function similarity(str1, str2) {
+    
+    let dp = [];
+    for (let i = 0; i <= str1.length; i++) {
+        dp[i] = [i];
+    }
+    for (let j = 0; j <= str2.length; j++) {
+        dp[0][j] = j;
+    }
+
+    
+    for (let i = 1; i <= str1.length; i++) {
+        for (let j = 1; j <= str2.length; j++) {
+            let cost = (str1.charAt(i - 1) == str2.charAt(j - 1)) ? 0 : 1;
+            dp[i][j] = Math.min(
+                dp[i - 1][j] + 1,     
+                dp[i][j - 1] + 1,     
+                dp[i - 1][j - 1] + cost  
+            );
+        }
+    }
+    
+    return dp[str1.length][str2.length];
 }
 
 function addAccent(word) {
@@ -451,10 +590,13 @@ function addAccent(word) {
     return tup;
 }
 
-function getPresSubj(stem, attr, sujeto) {
+function getPresSubj(stem, attr, sujeto1) {
     var pres_subj;
     var opp = attr[0] == 0? 1:0;
-    sujeto = sujeto == 0? 2:sujeto;
+    var sujeto = sujeto1 == 0? 2:sujeto1;
+    if(attr[3]["subj"] != null) {
+        return attr[3]["subj"][sujeto];
+    }
     if(sujeto == 3 || sujeto == 5) {
         pres_subj = getYo(stem, attr);
         pres_subj = pres_subj.substring(0, pres_subj.length - 1);
@@ -510,7 +652,7 @@ function getPresSubj(stem, attr, sujeto) {
         pres_subj = pres_subj.substring(0, pres_subj.length - 1) + pres_endings[opp][sujeto];
     }
     if(attr[1]) {
-        pres_subj = reflexive_pronouns[sujeto] + " " + pres_subj;
+        pres_subj = reflexive_pronouns[sujeto1] + " " + pres_subj;
     }
     if(attr[0] == 0) {
         var ending = pres_endings[opp][sujeto];
@@ -548,9 +690,9 @@ function getEllos(stem, attr, sujeto) {
     if(attr[3]["pret"] != null) {
         pret = attr[3]["pret"][sujeto];
     }
-    if(attr[1]) {
-        pret = "se "+ pret;
-    }
+    // if(attr[1]) {
+    //     pret = "se "+ pret;
+    // }
     return pret;
 }
 
@@ -607,8 +749,64 @@ function stemChange(stem, type, oneLetter) {
 }
 
 function getAttributes(verb) {
-    //form: [ar/er/ir, reflexive, stem change, {special forms}, [[infinitive, gerund, participle, past],[infinitive, etc.]]]
+    //form: [ar/er/ir, reflexive, stem change, {special forms}, [[infinitive, gerund, participle, pret, imp subj],[infinitive, etc.]]]
     switch(verb) {
+        case "hablar":
+            return [0, false, 0, {}, [["talk", "talking", "talked", "talked", "talked"], ["speak", "speaking", "spoken", "spoke", "spoke"]]];
+        case "comer":
+            return [1, false, 0, {}, [["eat", "eating", "eaten", "ate", "ate"]]];
+        case "vivir":
+            return [2, false, 0, {}, [["live", "living", "lived", "lived", "lived"]]];
+        case "comenzar":
+            return [0, false, 1, {}, [["start", "starting", "started", "started", "started"], ["begin", "beginning", "begun", "began", "began"]]];
+        case "contar":
+            return [0, false, 3, {}, [["count", "counting", "counted", "counted", "counted"]]];
+        case "pensar":
+            return [0, false, 1, {}, [["think", "thinking", "thought", "thought", "thought"]]];
+        case "volver":
+            return [1, false, 3, {"participle":"vuelto"}, [["return", "returning", "returned", "returned", "returned"]]];
+        case "entender":
+            return [1, false, 1, {}, [["understand", "understanding", "understood", "understood", "understood"]]];
+        case "dormir":
+            return [2, false, 3, {}, [["sleep", "sleeping", "slept", "slept", "slept"]]];
+        case "pedir":
+            return [2, false, 2, {}, [["order", "ordering", "ordered", "ordered", "ordered"]]];
+        case "huir":
+            return [2, false, 0, {"boot":"huy", "gerund":"huyendo"}, [["escape", "escaping", "escaped", "escaped", "escaped"], ["flee", "fleeing", "fled", "fled", "fled"]]];
+        case "mentir":
+            return [2, false, 1, {}, [["lie", "lying", "lied", "lied", "lied"]]];
+        case "creer":
+            return [1, false, 0, {"participle":"creído", "gerund":"creyendo"}, [["believe", "believing", "believed", "believed", "believed"]]];
+        case "seguir":
+            return [2, false, 2, {"yo":"sig"}, [["follow", "following", "followed", "followed", "followed"]]];
+        case "andar":
+            return [0, false, 0, {"pret":["anduve", "anduviste", "anduvo", "anduvimos", "anduvieron"]}, [["walk", "walking", "walked", "walked", "walked"]]];
+        case "conducir":
+            return [2, false, 0, {"yo":"conduzc", "pret":["conduje", "condujiste", "condujo", "condujimos", "condujeron"]}, [["drive", "driving", "driven","drove", "drove"]]];
+        case "reír":
+            return [2, false, 2, {"future":"reir", "participle":"reído", "boot":"rí", "gerund":"riendo"}, [["laugh", "laughing", "laughed", "laughed", "laughed"]]];
+        case "caber":
+            return [1, false, 0, {"future":"cabr", "yo":"quep", "pret":["cupe", "cupiste", "cupo", "cupimos", "cupieron"]}, [["fit", "fitting", "fit", "fit", "fit"], ["fit", "fitting", "fitted", "fitted", "fitted"]]];
+        case "dar":
+            return [0, false, 0, {"pret":["di", "diste", "dio", "dimos", "dieron"], "subj":["dé", "des", "dé", "demos", "den", "deis"], "pres":["doy", "das", "da", "damos", "dan", "dais"]}, [["give", "giving", "given", "gave", "gave"]]];
+        case "caer":
+            return [1, false, 0, {"participle":"caído", "yo":"caig", "gerund":"cayendo"}, [["fall", "falling", "fallen", "fell", "fell"]]];
+        case "saber":
+            return [1, false, 0, {"future": "sabr", "pres":["sé", "sabes", "sabe", "sabemos", "saben", "sabéis"], "pret":["supe", "supiste", "supo", "supimos", "supieron"], "subj":["sepa", "sepas", "sepa", "sepamos", "sepan", "sepáis"]}, [["know", "knowing", "known", "found out", "knew"]]];
+        case "poner":
+            return [1, false, 0, {"yo":"pong", "future":"pondr", "participle":"puesto", "pret":["puse", "pusiste", "puso", "pusimos", "pusieron"], "command":"pon"}, [["put", "putting", "put", "put", "put"], ["place", "placing", "placed", "placed", "placed"], ["set", "setting", "set", "set", "set"]]];
+        case "hacer":
+            return [1, false, 0, {"yo":"hag", "future":"har", "participle":"hecho", "pret":["hice", "hiciste", "hizo", "hicimos", "hicieron"], "command":"haz"}, [["do", "doing", "done", "did", "did"], ["make", "making", "made", "made", "made"]]];
+        case "ir":
+            return [2, false, 0, {"pres":["voy", "vas", "va", "vamos", "van", "vais"], "pret":["fui", "fuiste", "fue", "fuimos", "fueron"], "subj":["vaya", "vayas", "vaya", "vayamos", "vayan", "vayáis"], "command":"ve", "gerund":"yendo", "imp":["iba", "ibas", "iba", "íbamos", "iban"], "nos":"vamos"}, [["go", "going", "gone", "went", "went"]]];
+        case "estar":
+            return [0, false, 0, {"pres":["estoy", "estás", "está", "estamos", "están", "estáis"], "pret":["estuve", "estuviste", "estuvo", "estuvimos", "estuvieron"], "subj":["esté", "estés", "esté", "estemos", "estén", "estéis"]}, [["be", "being", "been", "was", "were"]]];
+        case "tener":
+            return [1, false, 1, {"yo":"teng", "future":"tendr", "command":"ten", "pret":["tuve", "tuviste", "tuvo","tuvimos", "tuvieron"]}, [["have", "having", "had", "received", "had"], ["have", "having", "had", "got", "had"]]];
+        case "querer":
+            return [1, false, 1, {"pret":["quise", "quisiste", "quiso", "quisimos", "quisieron"], "future":"querr"}, [["want", "wanting", "wanted", "tried", "wanted"], ["want", "wanting", "wanted", "refused", "wanted"]]];
+        case "valer":
+            return [1, false, 0, {"future":"valdr", "command":"val", "yo":"valg"}, [["be worth", "being worth", "been worth", "was worth", "were worth"], ["cost", "costing", "cost", "costed", "costed"]]];
         case "acostarse":
             return [0, true, 3, {}, [["go to bed", "going to bed", "gone to bed", "went to bed"]]];
         case "adquirir":
@@ -654,11 +852,9 @@ function getAttributes(verb) {
         case "sugerir":
             return [2, false, 1, {}, [["suggest", "suggesting", "suggested", "suggested"]]];
         case "torcer":
-            return [1, false, 3, {"yo":"tuerz", "participle":["torcido", "tuerto"]}, [["twist", "twisting", "twisted", "twist"]]];
+            return [1, false, 3, {"yo":"tuerz", "participle":["torcido", "tuerto"]}, [["twist", "twisting", "twisted", "twisted"]]];
         case "vestirse":
             return [2, true, 2, {}, [["get dressed", "getting dressed", "gotten dressed", "got dressed"]]];
-        case "ahogarse":
-            return [0, true, 0, {}, [["drown", "drowning", "drowned", "drowned"]]];
         default:
             return null;
     }
@@ -689,5 +885,33 @@ function clearScreen() {
             document.getElementById(order[i] + "_spanish").style.color = "black";
             document.getElementById(order[i] + "_ingles").style.color = "black";
         }
+    }
+}
+
+function switchLevel() {
+    let verb6 = ["acostarse", "adquirir", "atraer", "conseguir", "construir", "despedir", "divertirse", "escoger", "forzar", "freír", "elegir", "medir",
+                 "morir", "ofrecer", "portarse", "producir", "referir", "reñir", "sentarse", "sonreír", "sentirse", "sugerir", "torcer", "vestirse"];
+    let verb5 = ["hablar", "comer", "vivir", "comenzar", "contar", "pensar", "volver", "entender", "dormir", "pedir", "huir","mentir", "creer", "seguir", 
+                 "andar", "conducir", "reír", "caber", "dar", "caer", "saber", "poner", "hacer", "ir", "estar", "tener", "querer", "valer"];
+    if(level == 5) {
+        level = 6;
+        toggleVerb(verb6);
+        document.getElementById("level").value = "Spanish 6";
+    } else {
+        level = 5;
+        toggleVerb(verb5);
+        document.getElementById("level").value = "Spanish 5";
+    }
+    clearScreen();
+}
+
+function toggleVerb(toSwitch) {
+    var dropdown = document.getElementById("verbSelector");
+    dropdown.innerHTML = "";
+    for(var i = 0; i < toSwitch.length; i++) {
+        var opt = document.createElement("option");
+        opt.value = toSwitch[i];
+        opt.text = toSwitch[i];
+        dropdown.appendChild(opt);
     }
 }
