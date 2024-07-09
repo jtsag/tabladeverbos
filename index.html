@@ -5,42 +5,47 @@
         <link rel="stylesheet" href="VC_style.css">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <script src="VC_brains.js"></script>
-        <!-- <script src="levels.json"></script> -->
-        <title>Tabla de Verbos (Sp 6)!</title>
+        <title>Verb Chart!</title>
     </head>
 
     <body>
         <div class="header">
+            <label>I am in: </label>
+            <input type="text" id="level" name="level" disabled="true" value="Spanish 5" style="width: 9ch;"> 
+            <input type="button" value="Switch" onClick="switchLevel()" id="switch"><br>
             <input type="button" value="Roll subject!" onClick="changeSubject()">
-            <input type="button" value="Clear" onclick="clearScreen()">
+            <input type="button" value="Clear" onclick="clearScreen()" id="Clear">
             <select id="verbSelector" name="verbSelector" onchange="clearScreen()">
-                <option value="acostarse">acostarse</option>
-                <option value="adquirir">adquirir</option>
-                <option value="atraer">atraer</option>
-                <option value="conseguir">conseguir</option>
-                <option value="construir">construir</option>
-                <option value="despedir">despedir</option>
-                <option value="divertirse">divertirse</option>
-                <option value="escoger">escoger</option>
-                <option value="forzar">forzar</option>
-                <option value="freír">freír</option>
-                <option value="elegir">elegir</option>
-                <option value="medir">medir</option>
-                <option value="morir">morir</option>
-                <option value="ofrecer">ofrecer</option>
-                <option value="portarse">portarse</option>
-                <option value="producir">producir</option>
-                <option value="referir">referir</option>
-                <option value="reñir">reñir</option>
-                <option value="sentarse">sentarse</option>
-                <option value="sonreír">sonreír</option>
-                <option value="sentirse">sentirse</option>
-                <option value="sugerir">sugerir</option>
-                <option value="torcer">torcer</option>
-                <option value="vestirse">vestirse</option>
-                <option value="ahogarse">ahogarse</option>
+                <option value="hablar">hablar</option>
+                <option value="comer">comer</option>
+                <option value="vivir">vivir</option>
+                <option value="comenzar">comenzar</option>
+                <option value="contar">contar</option>
+                <option value="pensar">pensar</option>
+                <option value="volver">volver</option>
+                <option value="entender">entender</option>
+                <option value="dormir">dormir</option>
+                <option value="pedir">pedir</option>
+                <option value="huir">huir</option>
+                <option value="mentir">mentir</option>
+                <option value="creer">creer</option>
+                <option value="seguir">seguir</option>
+                <option value="andar">andar</option>
+                <option value="conducir">conducir</option>
+                <option value="reír">reír</option>
+                <option value="caber">caber</option>
+                <option value="dar">dar</option>
+                <option value="caer">caer</option>
+                <option value="saber">saber</option>
+                <option value="poner">poner</option>
+                <option value="hacer">hacer</option>
+                <option value="ir">ir</option>
+                <option value="estar">estar</option>
+                <option value="tener">tener</option>
+                <option value="querer">querer</option>
+                <option value="valer">valer</option>
             </select>
-            <input type="button" value="Check!" onclick="checkChart()">
+            <input type="button" value="Check!" onclick="checkChart()" id="Check">
         </div> <br>
         <div class="chart">
             <input type="text" id="sujeto" name="sujeto" disabled="true" value="sujeto-- ">
