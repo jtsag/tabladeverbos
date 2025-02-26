@@ -935,7 +935,6 @@ function switchLevel() {
         toggleVerb(verb5);
         document.getElementById("level").value = "Spanish 5";
     }
-    clearScreen();
 }
 
 function toggleVerb(toSwitch) {
