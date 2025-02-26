@@ -40,3 +40,10 @@
 #Clear {
     background-color: #D38F8F;
 }
+
+#suggestion_receiver {
+    font-size: 75%;
+    bottom: 0;
+    left: 0;
+    margin-top: 10px;
+}
