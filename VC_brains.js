@@ -1,16 +1,35 @@
-var sujeto;
-var reflexive_pronouns;
-var pres_endings;
-var imp_endings;
-var pret_endings;
-var haber_pres;
-var fut_endings;
-var imp_subj_endings;
-var haber_subj;
-var haber_imp_subj;
-var e_subs;
-var verbo;
-var level;
+var sujeto; // Subject the chart is set to
+var reflexive_pronouns; // List of the reflexive pronouns
+var pres_endings; // 2D list of the endings for ar | er | ir
+var imp_endings; // 2D list of the endings for ar | er/ir
+var pret_endings; // 2D list of the endings for ar | er/ir
+var haber_pres; // Conjugations of haber in the present
+var fut_endings; // List of the future endings
+var imp_subj_endings; // 2D list of the endings (-ra) | (-se)
+var haber_subj; // List of conjugations of haber in the present subjunctive
+var haber_imp_subj; // Haber in the imperfect subjunctive
+var e_subs; // List of english subjective pronouns
+var verbo; // The verb that the chart is set to
+var level; // The Spanish level that guides the verb list
+
+// Constants for verb endings
+const AR = 0;
+const ER = 1;
+const IR = 2;
+
+// Constants for stem change types
+const NO_SC = 0;
+const E_IE = 1;
+const E_I = 2;
+const O_UE = 3;
+
+// Constants for subjects
+const YO = 0;
+const TU = 1;
+const EL = 2;
+const NOSOTROS = 3;
+const ELLOS = 4;
+const VOSOTROS = 5;
 
 function init() {
     sujeto = -1;
@@ -29,7 +48,7 @@ function init() {
 }
 
 function changeSubject() {
-    clearScreen();
+
     sujeto = Math.floor(Math.random() * 5);
     switch(sujeto) {
         case 0:
@@ -54,9 +73,9 @@ function changeSubject() {
 
 function getSolution() {
     verbo = document.getElementById("verbSelector").value;
-    var attr = getAttributes(verbo);
-    var plain_verb;
-    if(attr[1]) {
+    let attr = getAttributes(verbo); //Guiding attributes for the verb
+    let plain_verb;
+    if(attr.isReflexive) {
         plain_verb = verbo.substring(0, verbo.length - 2);
     } else {
         plain_verb = verbo;
@@ -66,50 +85,50 @@ function getSolution() {
     var spanish = [];
     //infinitive
     var infin = plain_verb;
-    if(attr[1]) {
+    if(attr.isReflexive) {
         infin += reflexive_pronouns[sujeto];
     }
     spanish.push(infin);
 
     //gerund
     var ger;
-    if(attr[3]["gerund"] == null) {
-        if(attr[0] == 2 && attr[2] != 0) {
-            ger = stemChange(stem, attr[2], true);
+    if(attr.specialForms["gerund"] == null) {
+        if(attr.endingType == IR && attr.stemChangeType != NO_SC) {
+            ger = stemChange(stem, attr.stemChangeType, true);
         } else {
             ger = stem;
         }
-        if(attr[0] == 0) {
-            if(attr[1]) {
+        if(attr.endingType == AR) {
+            if(attr.isReflexive) {
                 ger = [ger + "ándo" + reflexive_pronouns[sujeto], reflexive_pronouns[sujeto] + " - " + ger + "ando"];
             } else {
                 ger += "ando";
             }
         } else {
-            if(attr[1]) {
+            if(attr.isReflexive) {
                 ger = [ger + "iéndo" + reflexive_pronouns[sujeto], reflexive_pronouns[sujeto] + " - " + ger + "iendo"];
             } else {
                 ger += "iendo";
             }
         }
     } else {
-        ger = attr[3]["gerund"];
+        ger = attr.specialForms["gerund"];
     }
     spanish.push(ger);
 
     //participle
     var part;
-    if(attr[3]["participle"] == null) {
-        if(attr[0] == 0) {
+    if(attr.specialForms["participle"] == null) {
+        if(attr.endingType == AR) {
             part = stem + "ado";
         } else {
             part = stem + "ido";
         }
-        if(attr[1]) {
+        if(attr.isReflexive) {
             part = reflexive_pronouns[sujeto] + " - " + part;
         }
     } else {
-        part = attr[3]["participle"];
+        part = attr.specialForms["participle"];
         if(part instanceof Array) {
             part = part[0];
         }
@@ -118,39 +137,39 @@ function getSolution() {
 
     //present
     var pres;
-    if(attr[3]["pres"] != null) {
-        pres = attr[3]["pres"][sujeto];
+    if(attr.specialForms["pres"] != null) {
+        pres = attr.specialForms["pres"][sujeto];
     }
     else { 
-        if(sujeto == 3) {
-            if(attr[0] == 2 && stem.substring(stem.length - 1) == "e") {
+        if(sujeto == NOSOTROS) {
+            if(attr.endingType == IR && stem.substring(stem.length - 1) == "e") {
                 pres = stem + "ímos";
             } else {
-                pres = stem + pres_endings[attr[0]][sujeto];
+                pres = stem + pres_endings[attr.endingType][sujeto];
             }
-        } else if(sujeto == 0) {
+        } else if(sujeto == YO) {
             pres = getYo(stem, attr);
         }else {
-            if(attr[3]["boot"] == null) {
-                pres = stemChange(stem, attr[2], false) + pres_endings[attr[0]][sujeto];    
+            if(attr.specialForms["boot"] == null) {
+                pres = stemChange(stem, attr.stemChangeType, false) + pres_endings[attr.endingType][sujeto];    
             } else {
-                pres = attr[3]["boot"] + pres_endings[attr[0]][sujeto];
+                pres = attr.specialForms["boot"] + pres_endings[attr.endingType][sujeto];
             }
         }
     }
-    if(attr[1]) {
+    if(attr.isReflexive) {
         pres = reflexive_pronouns[sujeto] + " "+ pres;
     }
     spanish.push(pres);
 
     //imperfect
     var imp;
-    if(attr[3]["imp"] != null) {
-        imp = attr[3]["imp"][sujeto];
+    if(attr.specialForms["imp"] != null) {
+        imp = attr.specialForms["imp"][sujeto];
     } else {
-        var suj_idx = attr[0] == 0? 0:1;
+        var suj_idx = attr.endingType == AR? 0:1;
         imp = stem + imp_endings[suj_idx][sujeto];
-        if(attr[1]) {
+        if(attr.isReflexive) {
             imp = reflexive_pronouns[sujeto] +" "+ imp;
         }
     }
@@ -158,14 +177,14 @@ function getSolution() {
 
     //pret
     var pret;
-    if(sujeto == 2 || sujeto == 4) {
+    if(sujeto == EL || sujeto == ELLOS) {
         pret = getEllos(stem, attr, sujeto);
-        if(attr[1]) {
+        if(attr.isReflexive) {
             pret = "se " + pret;
         }
     } else {
-        if(attr[3]["pret"] == null) {
-            if(sujeto == 0 && attr[0] == 0) {
+        if(attr.specialForms["pret"] == null) {
+            if(sujeto == YO && attr.endingType == AR) {
                 if(stem.substring(stem.length - 1) == "z") {
                     pret = stem.substring(0, stem.length - 1) + "c" + pret_endings[suj_idx][sujeto];
                 } else if(stem.substring(stem.length - 1) == "g") {
@@ -183,23 +202,23 @@ function getSolution() {
                 pret = stem + pret_endings[suj_idx][sujeto];
             }
         } else {
-            pret = attr[3]["pret"][sujeto];
+            pret = attr.specialForms["pret"][sujeto];
         }
-        if(attr[1]) {
+        if(attr.isReflexive) {
             pret = reflexive_pronouns[sujeto] +" "+ pret;
         }
     }
     spanish.push(pret);
 
     //present perfect
-    if(attr[1]) {
+    if(attr.isReflexive) {
         spanish.push(part.replace("-", haber_pres[sujeto]));
     } else {
         spanish.push(haber_pres[sujeto] + " " + part);
     }
 
     //pluperfect
-    if(attr[1]) {
+    if(attr.isReflexive) {
         spanish.push(part.replace("-", "hab" + imp_endings[1][sujeto]));
     } else {
         spanish.push("hab" + imp_endings[1][sujeto] + " " + part);
@@ -207,18 +226,18 @@ function getSolution() {
 
     //future
     var fut;
-    if(attr[3]["future"] == null) {
+    if(attr.specialForms["future"] == null) {
         fut = plain_verb + fut_endings[sujeto];
     } else {
-        fut = attr[3]["future"] + fut_endings[sujeto];
+        fut = attr.specialForms["future"] + fut_endings[sujeto];
     }
-    if(attr[1]) {
+    if(attr.isReflexive) {
         fut = reflexive_pronouns[sujeto] + " " + fut;
     }
     spanish.push(fut);
 
     //fut perf
-    if(attr[1]) {
+    if(attr.isReflexive) {
         spanish.push(part.replace("-", "habr" + fut_endings[sujeto]));
     } else {
         spanish.push("habr" + fut_endings[sujeto] + " " + part);
@@ -226,18 +245,18 @@ function getSolution() {
 
     //cond
     var cond;
-    if(attr[3]["future"] == null) {
+    if(attr.specialForms["future"] == null) {
         cond = plain_verb + imp_endings[1][sujeto];
     } else {
-        cond = attr[3]["future"] + imp_endings[1][sujeto];
+        cond = attr.specialForms["future"] + imp_endings[1][sujeto];
     }
-    if(attr[1]) {
+    if(attr.isReflexive) {
         cond = reflexive_pronouns[sujeto] + " " + cond;
     }
     spanish.push(cond);
 
     //cond perf
-    if(attr[1]) {
+    if(attr.isReflexive) {
         spanish.push(part.replace("-", "habr" + imp_endings[1][sujeto]));
     } else {
         spanish.push("habr" + imp_endings[1][sujeto] + " " + part);
@@ -249,12 +268,12 @@ function getSolution() {
     //imp subj
     var imp_subj = getEllos(stem, attr, 4);
     imp_subj = imp_subj.substring(0, imp_subj.length - 3);
-    if(attr[1]) {
+    if(attr.isReflexive) {
         // imp_subj = imp_subj.substring(3);
         imp_subj = reflexive_pronouns[sujeto] + " " + imp_subj;
     }
-    if(sujeto == 3) {
-        if(attr[0] == 0) {
+    if(sujeto == NOSOTROS) {
+        if(attr.endingType == AR) {
             imp_subj = imp_subj.substring(0, imp_subj.length - 1) + "á";
         } else {
             imp_subj = imp_subj.substring(0, imp_subj.length - 1) + "é";
@@ -263,14 +282,14 @@ function getSolution() {
     spanish.push([imp_subj + imp_subj_endings[0][sujeto], imp_subj + imp_subj_endings[1][sujeto]]);
 
     //pres. perf subj
-    if(attr[1]) {
+    if(attr.isReflexive) {
         spanish.push(part.replace("-", haber_subj[sujeto]));
     } else {
         spanish.push(haber_subj[sujeto] + " " + part);
     }
 
     //pluperf subj
-    if(attr[1]) {
+    if(attr.isReflexive) {
         spanish.push([part.replace("-", haber_imp_subj[0][sujeto]), part.replace("-", haber_imp_subj[1][sujeto])]);
     } else {
         spanish.push([haber_imp_subj[0][sujeto] + " " + part, haber_imp_subj[1][sujeto] + " " + part]);
@@ -278,23 +297,23 @@ function getSolution() {
 
     // Tu +
     var tup;
-    if(attr[3]["command"] != null) {
-        tup = attr[3]["command"];
+    if(attr.specialForms["command"] != null) {
+        tup = attr.specialForms["command"];
     }
-    else if(attr[3]["pres"] != null) {
-        tup = attr[3]["pres"][2];
+    else if(attr.specialForms["pres"] != null) {
+        tup = attr.specialForms["pres"][2];
     }
     else {
-        if(attr[3]["boot"] == null) {
-            tup = stemChange(stem, attr[2], false);    
+        if(attr.specialForms["boot"] == null) {
+            tup = stemChange(stem, attr.stemChangeType, false);    
         } else {
-            tup = attr[3]["boot"];
+            tup = attr.specialForms["boot"];
         }
-        if(attr[1]) {
+        if(attr.isReflexive) {
             tup = addAccent(tup);
-            tup += pres_endings[attr[0]][2] + reflexive_pronouns[1];
+            tup += pres_endings[attr.endingType][2] + reflexive_pronouns[1];
         } else {
-            tup += pres_endings[attr[0]][2];
+            tup += pres_endings[attr.endingType][2];
         }
     }
     spanish.push([tup, "¡" + tup + "!"]);
@@ -304,7 +323,7 @@ function getSolution() {
 
     //ud
     var base_ud = getPresSubj(stem, attr, 2);
-    if(attr[1]) {
+    if(attr.isReflexive) {
         var temp = base_ud.substring(base_ud.length - 1);
         base_ud = base_ud.substring(3, base_ud.length - 1);
         base_ud = addAccent(base_ud) + temp + "se";
@@ -313,7 +332,7 @@ function getSolution() {
 
     //uds
     var base_uds = getPresSubj(stem, attr, 4);
-    if(attr[1]) {
+    if(attr.isReflexive) {
         var temp = base_uds.substring(base_uds.length - 2);
         base_uds = base_uds.substring(3, base_uds.length - 2);
         base_uds = addAccent(base_uds) + temp + "se";
@@ -323,8 +342,8 @@ function getSolution() {
     //vosotros
     var vosn = "no " + getPresSubj(stem, attr, 5);
     var vosp = plain_verb.substring(0, plain_verb.length - 1) + "d";
-    if(attr[1]) {
-        if(attr[0] == 2) {
+    if(attr.isReflexive) {
+        if(attr.endingType == IR) {
             vosp = vosp.substring(0, vosp.length - 2) + "íos";
         } else {
             vosp = vosp.substring(0, vosp.length - 1) + "os";
@@ -335,11 +354,11 @@ function getSolution() {
 
     //nosotros
     var nosotros;
-    if(attr[3]["nos"] != null) {
-        nosotros = attr[3]["nos"];
+    if(attr.specialForms["nos"] != null) {
+        nosotros = attr.specialForms["nos"];
     } else {
         nosotros = getPresSubj(stem, attr, 3);
-        if(attr[1]) {
+        if(attr.isReflexive) {
             nosotros = nosotros.substring(4, nosotros.length - 3);
             if(nosotros.substring(nosotros.length - 1) == "a") {
                 nosotros = nosotros.substring(0, nosotros.length - 1) + "ámonos";
@@ -355,10 +374,10 @@ function getSolution() {
         if(!(obj instanceof Array)) {
             obj = [obj];
         }
-        if(attr[3]["participle"] != null && attr[3]["participle"] instanceof Array) {
+        if(attr.specialForms["participle"] != null && attr.specialForms["participle"] instanceof Array) {
             for(var j = 0; j < obj.length; j++) {
-                if(obj[j].includes(attr[3]["participle"][0])) {
-                    obj.push(obj[j].replace(attr[3]["participle"][0], attr[3]["participle"][1]));
+                if(obj[j].includes(attr.specialForms["participle"][0])) {
+                    obj.push(obj[j].replace(attr.specialForms["participle"][0], attr.specialForms["participle"][1]));
                 }
             }
         }
@@ -367,11 +386,11 @@ function getSolution() {
 
     //Then construct the english
     var english = [];
-    for(var i =0; i < 23; i++) {
+    for(var i = 0; i < 23; i++) {
         english.push([]);
     }
-    for(var i =0; i < attr[4].length; i++) {
-        var curr_ops = attr[4][i];
+    for(var i = 0; i < attr.english.length; i++) {
+        var curr_ops = attr.english[i];
         var be = false;
         var go = false;
         var have = false;
@@ -389,33 +408,33 @@ function getSolution() {
         english[1].push(new RegExp("^" + curr_ops[1] + "$"));
         english[2].push(new RegExp("^" + curr_ops[2] + "$"));
         if(go) {
-            if(sujeto == 2) {
+            if(sujeto == EL) {
                 english[3].push(new RegExp("^" + e_subs[sujeto] + " goes" + curr_ops[0].substring(2) + "$"));
             } else {
                 english[3].push(new RegExp("^" + e_subs[sujeto] + " " + curr_ops[0] + "$"));
             }
         } else if(have) {
-            if(sujeto == 2) {
+            if(sujeto == EL) {
                 english[3].push(new RegExp("^" + e_subs[sujeto] + " has" + curr_ops[0].substring(4) + "$"));
             } else {
                 english[3].push(new RegExp("^" + e_subs[sujeto] + " " + curr_ops[0] + "$"));
             }
         } else if(space) {
-            if(sujeto == 2) {
+            if(sujeto == EL) {
                 english[3].push(new RegExp("^" + e_subs[sujeto] + " " + curr_ops[0].substring(0, curr_ops[0].indexOf(" ")) + "s" + curr_ops[0].substring(curr_ops[0].indexOf(" ")) + "$"));
             } else {
                 english[3].push(new RegExp("^" + e_subs[sujeto] + " " + curr_ops[0] + "$"));
             }
         } else {
-            if(sujeto == 0 && be) {
+            if(sujeto == YO && be) {
                 english[3].push(new RegExp("^" + e_subs[sujeto] + " am" + curr_ops[0].substring(2) + "$"));
-            } else if(sujeto == 2) {
+            } else if(sujeto == EL) {
                 if(be) {
                     english[3].push(new RegExp("^" + e_subs[sujeto] + " is" + curr_ops[0].substring(2) + "$"));
                 } else {
                     english[3].push(new RegExp("^" + e_subs[sujeto] + " " + curr_ops[0] + "s" + "$"));
                 }
-            } else if(be && (sujeto == 1 || sujeto == 3 || sujeto == 4)) {
+            } else if(be && (sujeto == TU || sujeto == NOSOTROS || sujeto == ELLOS)) {
                 english[3].push(new RegExp("^" + e_subs[sujeto] + " are" + curr_ops[0].substring(2) + "$"));
             } else {
                 english[3].push(new RegExp("^" + e_subs[sujeto] + " " + curr_ops[0] + "$"));
@@ -424,18 +443,18 @@ function getSolution() {
         
         english[4].push(new RegExp("^" + e_subs[sujeto] + " used to " + curr_ops[0] + "$"));
         if(!be) {    
-            if(sujeto == 0 || sujeto == 2) {
+            if(sujeto == YO || sujeto == EL) {
                 english[4].push(new RegExp("^" + e_subs[sujeto] + " was " + curr_ops[1] + "$"));
             } else {
                 english[4].push(new RegExp("^" + e_subs[sujeto] + " were " + curr_ops[1] + "$"));
             }
         }
-        if(be && (sujeto == 1 || sujeto == 3 || sujeto == 4)) {
+        if(be && (sujeto == TU || sujeto == NOSOTROS || sujeto == ELLOS)) {
             english[5].push(new RegExp("^" + e_subs[sujeto] + " were" + curr_ops[0].substring(2) + "$"))
         } else {
             english[5].push(new RegExp("^" + e_subs[sujeto] + " " + curr_ops[3] + "$"));
         }
-        if(sujeto != 2) {
+        if(sujeto != EL) {
             english[6].push(new RegExp("^" + e_subs[sujeto] + " have " + curr_ops[2] + "$"));
         } else {
             english[6].push(new RegExp("^" + e_subs[sujeto] + " has " + curr_ops[2] + "$"));
@@ -592,15 +611,15 @@ function addAccent(word) {
 
 function getPresSubj(stem, attr, sujeto1) {
     var pres_subj;
-    var opp = attr[0] == 0? 1:0;
-    var sujeto = sujeto1 == 0? 2:sujeto1;
-    if(attr[3]["subj"] != null) {
-        return attr[3]["subj"][sujeto];
+    var opp = attr.endingType == AR? 1:0;
+    let suj = sujeto1 == 0? 2:sujeto1;
+    if(attr.specialForms["subj"] != null) {
+        return attr.specialForms["subj"][suj];
     }
-    if(sujeto == 3 || sujeto == 5) {
+    if(suj == NOSOTROS || suj == VOSOTROS) {
         pres_subj = getYo(stem, attr);
         pres_subj = pres_subj.substring(0, pres_subj.length - 1);
-        if(attr[2] != 0 || stem == "adquir")  {
+        if(attr.stemChangeType != NO_SC || stem == "adquir")  {
             var find;
             var change;
             for(var i = 0; i < pres_subj.length; i++) {
@@ -608,29 +627,29 @@ function getPresSubj(stem, attr, sujeto1) {
                     pres_subj = pres_subj.substring(0,i) + "i" + pres_subj.substring(i+1);
                 }
             }
-            if(attr[0] != 2) {
-                if(attr[2] == 1) {
+            if(attr.endingType != IR) {
+                if(attr.stemChangeType == E_IE) {
                     find = "ie";
                     change = "e";
                 }
-                else if(attr[2] == 2) {
+                else if(attr.stemChangeType == E_I) {
                     find = "i";
                     change = "e";
                 }
-                else if(attr[2] == 3) {
+                else if(attr.stemChangeType == O_UE) {
                     find = "ue";
                     change = "o";
                 }
             } else {
-                if(attr[2] == 1) {
+                if(attr.stemChangeType == E_IE) {
                     find = "ie";
                     change = "i";
                 }
-                else if(attr[2] == 2) {
+                else if(attr.stemChangeType == E_I) {
                     find = "i";
                     change = "i";
                 }
-                else if(attr[2] == 3) {
+                else if(attr.stemChangeType == O_UE) {
                     find = "ue";
                     change = "u";
                 }  else if(stem == "adquir") {
@@ -646,16 +665,16 @@ function getPresSubj(stem, attr, sujeto1) {
                 }
             }
         }
-        pres_subj += pres_endings[opp][sujeto];
+        pres_subj += pres_endings[opp][suj];
     } else {
         pres_subj = getYo(stem, attr);
-        pres_subj = pres_subj.substring(0, pres_subj.length - 1) + pres_endings[opp][sujeto];
+        pres_subj = pres_subj.substring(0, pres_subj.length - 1) + pres_endings[opp][suj];
     }
-    if(attr[1]) {
+    if(attr.isReflexive) {
         pres_subj = reflexive_pronouns[sujeto1] + " " + pres_subj;
     }
-    if(attr[0] == 0) {
-        var ending = pres_endings[opp][sujeto];
+    if(attr.endingType == AR) {
+        var ending = pres_endings[opp][suj];
         var inspect = pres_subj.substring(pres_subj.length - ending.length - 1, pres_subj.length - ending.length);
         if(inspect == "c") {
             pres_subj = pres_subj.substring(0, pres_subj.length - ending.length - 1) + "qu" + pres_subj.substring(pres_subj.length - ending.length);
@@ -668,14 +687,14 @@ function getPresSubj(stem, attr, sujeto1) {
     return pres_subj;
 }
 
-function getEllos(stem, attr, sujeto) {
+function getEllos(stem, attr, sujeto1) {
     var pret;
-    var idx = sujeto == 2? 3:6;
-    var suj_idx = attr[0] == 0? 0:1;
-    if(attr[0] == 2) {
-        pret = stemChange(stem, attr[2], true) + pret_endings[suj_idx][sujeto];
+    var idx = sujeto1 == 2? 3:6;
+    var suj_idx = attr.endingType == AR? 0:1;
+    if(attr.endingType == IR) {
+        pret = stemChange(stem, attr.stemChangeType, true) + pret_endings[suj_idx][sujeto1];
     } else {
-        pret = stem + pret_endings[suj_idx][sujeto];
+        pret = stem + pret_endings[suj_idx][sujeto1];
     }
     if(suj_idx == 1) {
         var start = pret.length - idx;
@@ -687,8 +706,8 @@ function getEllos(stem, attr, sujeto) {
             pret = pret.substring(0, pret.length - idx + 1) + "y" + pret.substring(pret.length - idx + 2);
         }
     }
-    if(attr[3]["pret"] != null) {
-        pret = attr[3]["pret"][sujeto];
+    if(attr.specialForms["pret"] != null) {
+        pret = attr.specialForms["pret"][sujeto1];
     }
     // if(attr[1]) {
     //     pret = "se "+ pret;
@@ -698,14 +717,14 @@ function getEllos(stem, attr, sujeto) {
 
 function getYo(stem, attr) {
     var tbr;
-    if(attr[3]["yo"] == null) {
-        if(attr[3]["boot"] == null) {
-            tbr= stemChange(stem, attr[2], false) + "o";
+    if(attr.specialForms["yo"] == null) {
+        if(attr.specialForms["boot"] == null) {
+            tbr= stemChange(stem, attr.stemChangeType, false) + "o";
         } else {
-            tbr= attr[3]["boot"] + "o";
+            tbr= attr.specialForms["boot"] + "o";
         }
     } else {
-        tbr= attr[3]["yo"] + "o";
+        tbr= attr.specialForms["yo"] + "o";
     }
     return tbr;
 }
@@ -748,113 +767,127 @@ function stemChange(stem, type, oneLetter) {
     return tbr;
 }
 
+function buildVerb(end, refl, changeType, eng, irrForms = {}) {
+    return {
+        endingType: end,
+        isReflexive: refl,
+        stemChangeType: changeType,
+        specialForms: irrForms,
+        english: eng
+    }
+}
+
+function verbMaker(lst) {
+    return buildVerb(lst[0], lst[1], lst[2], lst[4], lst[3])
+}
+
 function getAttributes(verb) {
     //form: [ar/er/ir, reflexive, stem change, {special forms}, [[infinitive, gerund, participle, pret, imp subj],[infinitive, etc.]]]
     switch(verb) {
         case "hablar":
-            return [0, false, 0, {}, [["talk", "talking", "talked", "talked", "talked"], ["speak", "speaking", "spoken", "spoke", "spoke"]]];
+            return verbMaker([0, false, 0, {}, [["talk", "talking", "talked", "talked", "talked"], ["speak", "speaking", "spoken", "spoke", "spoke"]]]);
         case "comer":
-            return [1, false, 0, {}, [["eat", "eating", "eaten", "ate", "ate"]]];
+            return verbMaker([1, false, 0, {}, [["eat", "eating", "eaten", "ate", "ate"]]]);
         case "vivir":
-            return [2, false, 0, {}, [["live", "living", "lived", "lived", "lived"]]];
+            return verbMaker([2, false, 0, {}, [["live", "living", "lived", "lived", "lived"]]]);
         case "comenzar":
-            return [0, false, 1, {}, [["start", "starting", "started", "started", "started"], ["begin", "beginning", "begun", "began", "began"]]];
+            return verbMaker([0, false, 1, {}, [["start", "starting", "started", "started", "started"], ["begin", "beginning", "begun", "began", "began"]]]);
         case "contar":
-            return [0, false, 3, {}, [["count", "counting", "counted", "counted", "counted"]]];
+            return verbMaker([0, false, 3, {}, [["count", "counting", "counted", "counted", "counted"]]]);
         case "pensar":
-            return [0, false, 1, {}, [["think", "thinking", "thought", "thought", "thought"]]];
+            return verbMaker([0, false, 1, {}, [["think", "thinking", "thought", "thought", "thought"]]]);
         case "volver":
-            return [1, false, 3, {"participle":"vuelto"}, [["return", "returning", "returned", "returned", "returned"]]];
+            return verbMaker([1, false, 3, {"participle":"vuelto"}, [["return", "returning", "returned", "returned", "returned"]]]);
         case "entender":
-            return [1, false, 1, {}, [["understand", "understanding", "understood", "understood", "understood"]]];
+            return verbMaker([1, false, 1, {}, [["understand", "understanding", "understood", "understood", "understood"]]]);
         case "dormir":
-            return [2, false, 3, {}, [["sleep", "sleeping", "slept", "slept", "slept"]]];
+            return verbMaker([2, false, 3, {}, [["sleep", "sleeping", "slept", "slept", "slept"]]]);
         case "pedir":
-            return [2, false, 2, {}, [["order", "ordering", "ordered", "ordered", "ordered"]]];
+            return verbMaker([2, false, 2, {}, [["order", "ordering", "ordered", "ordered", "ordered"]]]);
         case "huir":
-            return [2, false, 0, {"boot":"huy", "gerund":"huyendo"}, [["escape", "escaping", "escaped", "escaped", "escaped"], ["flee", "fleeing", "fled", "fled", "fled"]]];
+            return verbMaker([2, false, 0, {"boot":"huy", "gerund":"huyendo"}, [["escape", "escaping", "escaped", "escaped", "escaped"], ["flee", "fleeing", "fled", "fled", "fled"]]]);
         case "mentir":
-            return [2, false, 1, {}, [["lie", "lying", "lied", "lied", "lied"]]];
+            return verbMaker([2, false, 1, {}, [["lie", "lying", "lied", "lied", "lied"]]]);
         case "creer":
-            return [1, false, 0, {"participle":"creído", "gerund":"creyendo"}, [["believe", "believing", "believed", "believed", "believed"]]];
+            return verbMaker([1, false, 0, {"participle":"creído", "gerund":"creyendo"}, [["believe", "believing", "believed", "believed", "believed"]]]);
         case "seguir":
-            return [2, false, 2, {"yo":"sig"}, [["follow", "following", "followed", "followed", "followed"]]];
+            return verbMaker([2, false, 2, {"yo":"sig"}, [["follow", "following", "followed", "followed", "followed"]]]);
         case "andar":
-            return [0, false, 0, {"pret":["anduve", "anduviste", "anduvo", "anduvimos", "anduvieron"]}, [["walk", "walking", "walked", "walked", "walked"]]];
+            return verbMaker([0, false, 0, {"pret":["anduve", "anduviste", "anduvo", "anduvimos", "anduvieron"]}, [["walk", "walking", "walked", "walked", "walked"]]]);
         case "conducir":
-            return [2, false, 0, {"yo":"conduzc", "pret":["conduje", "condujiste", "condujo", "condujimos", "condujeron"]}, [["drive", "driving", "driven","drove", "drove"]]];
+            return verbMaker([2, false, 0, {"yo":"conduzc", "pret":["conduje", "condujiste", "condujo", "condujimos", "condujeron"]}, [["drive", "driving", "driven","drove", "drove"]]]);
         case "reír":
-            return [2, false, 2, {"future":"reir", "participle":"reído", "boot":"rí", "gerund":"riendo"}, [["laugh", "laughing", "laughed", "laughed", "laughed"]]];
+            return verbMaker([2, false, 2, {"future":"reir", "participle":"reído", "boot":"rí", "gerund":"riendo"}, [["laugh", "laughing", "laughed", "laughed", "laughed"]]]);
         case "caber":
-            return [1, false, 0, {"future":"cabr", "yo":"quep", "pret":["cupe", "cupiste", "cupo", "cupimos", "cupieron"]}, [["fit", "fitting", "fit", "fit", "fit"], ["fit", "fitting", "fitted", "fitted", "fitted"]]];
+            return verbMaker([1, false, 0, {"future":"cabr", "yo":"quep", "pret":["cupe", "cupiste", "cupo", "cupimos", "cupieron"]}, [["fit", "fitting", "fit", "fit", "fit"], ["fit", "fitting", "fitted", "fitted", "fitted"]]]);
         case "dar":
-            return [0, false, 0, {"pret":["di", "diste", "dio", "dimos", "dieron"], "subj":["dé", "des", "dé", "demos", "den", "deis"], "pres":["doy", "das", "da", "damos", "dan", "dais"]}, [["give", "giving", "given", "gave", "gave"]]];
+            return verbMaker([0, false, 0, {"pret":["di", "diste", "dio", "dimos", "dieron"], "subj":["dé", "des", "dé", "demos", "den", "deis"], "pres":["doy", "das", "da", "damos", "dan", "dais"]}, [["give", "giving", "given", "gave", "gave"]]]);
         case "caer":
-            return [1, false, 0, {"participle":"caído", "yo":"caig", "gerund":"cayendo"}, [["fall", "falling", "fallen", "fell", "fell"]]];
+            return verbMaker([1, false, 0, {"participle":"caído", "yo":"caig", "gerund":"cayendo"}, [["fall", "falling", "fallen", "fell", "fell"]]]);
         case "saber":
-            return [1, false, 0, {"future": "sabr", "pres":["sé", "sabes", "sabe", "sabemos", "saben", "sabéis"], "pret":["supe", "supiste", "supo", "supimos", "supieron"], "subj":["sepa", "sepas", "sepa", "sepamos", "sepan", "sepáis"]}, [["know", "knowing", "known", "found out", "knew"]]];
+            return verbMaker([1, false, 0, {"future": "sabr", "pres":["sé", "sabes", "sabe", "sabemos", "saben", "sabéis"], "pret":["supe", "supiste", "supo", "supimos", "supieron"], "subj":["sepa", "sepas", "sepa", "sepamos", "sepan", "sepáis"]}, [["know", "knowing", "known", "found out", "knew"]]]);
         case "poner":
-            return [1, false, 0, {"yo":"pong", "future":"pondr", "participle":"puesto", "pret":["puse", "pusiste", "puso", "pusimos", "pusieron"], "command":"pon"}, [["put", "putting", "put", "put", "put"], ["place", "placing", "placed", "placed", "placed"], ["set", "setting", "set", "set", "set"]]];
+            return verbMaker([1, false, 0, {"yo":"pong", "future":"pondr", "participle":"puesto", "pret":["puse", "pusiste", "puso", "pusimos", "pusieron"], "command":"pon"}, [["put", "putting", "put", "put", "put"], ["place", "placing", "placed", "placed", "placed"], ["set", "setting", "set", "set", "set"]]]);
         case "hacer":
-            return [1, false, 0, {"yo":"hag", "future":"har", "participle":"hecho", "pret":["hice", "hiciste", "hizo", "hicimos", "hicieron"], "command":"haz"}, [["do", "doing", "done", "did", "did"], ["make", "making", "made", "made", "made"]]];
+            return verbMaker([1, false, 0, {"yo":"hag", "future":"har", "participle":"hecho", "pret":["hice", "hiciste", "hizo", "hicimos", "hicieron"], "command":"haz"}, [["do", "doing", "done", "did", "did"], ["make", "making", "made", "made", "made"]]]);
         case "ir":
-            return [2, false, 0, {"pres":["voy", "vas", "va", "vamos", "van", "vais"], "pret":["fui", "fuiste", "fue", "fuimos", "fueron"], "subj":["vaya", "vayas", "vaya", "vayamos", "vayan", "vayáis"], "command":"ve", "gerund":"yendo", "imp":["iba", "ibas", "iba", "íbamos", "iban"], "nos":"vamos"}, [["go", "going", "gone", "went", "went"]]];
+            return verbMaker([2, false, 0, {"pres":["voy", "vas", "va", "vamos", "van", "vais"], "pret":["fui", "fuiste", "fue", "fuimos", "fueron"], "subj":["vaya", "vayas", "vaya", "vayamos", "vayan", "vayáis"], "command":"ve", "gerund":"yendo", "imp":["iba", "ibas", "iba", "íbamos", "iban"], "nos":"vamos"}, [["go", "going", "gone", "went", "went"]]]);
         case "estar":
-            return [0, false, 0, {"pres":["estoy", "estás", "está", "estamos", "están", "estáis"], "pret":["estuve", "estuviste", "estuvo", "estuvimos", "estuvieron"], "subj":["esté", "estés", "esté", "estemos", "estén", "estéis"]}, [["be", "being", "been", "was", "were"]]];
+            return verbMaker([0, false, 0, {"pres":["estoy", "estás", "está", "estamos", "están", "estáis"], "pret":["estuve", "estuviste", "estuvo", "estuvimos", "estuvieron"], "subj":["esté", "estés", "esté", "estemos", "estén", "estéis"]}, [["be", "being", "been", "was", "were"]]]);
         case "tener":
-            return [1, false, 1, {"yo":"teng", "future":"tendr", "command":"ten", "pret":["tuve", "tuviste", "tuvo","tuvimos", "tuvieron"]}, [["have", "having", "had", "received", "had"], ["have", "having", "had", "got", "had"]]];
+            return verbMaker([1, false, 1, {"yo":"teng", "future":"tendr", "command":"ten", "pret":["tuve", "tuviste", "tuvo","tuvimos", "tuvieron"]}, [["have", "having", "had", "received", "had"], ["have", "having", "had", "got", "had"]]]);
         case "querer":
-            return [1, false, 1, {"pret":["quise", "quisiste", "quiso", "quisimos", "quisieron"], "future":"querr"}, [["want", "wanting", "wanted", "tried", "wanted"], ["want", "wanting", "wanted", "refused", "wanted"]]];
+            return verbMaker([1, false, 1, {"pret":["quise", "quisiste", "quiso", "quisimos", "quisieron"], "future":"querr"}, [["want", "wanting", "wanted", "tried", "wanted"], ["want", "wanting", "wanted", "refused", "wanted"]]]);
         case "valer":
-            return [1, false, 0, {"future":"valdr", "command":"val", "yo":"valg"}, [["be worth", "being worth", "been worth", "was worth", "were worth"], ["cost", "costing", "cost", "costed", "costed"]]];
+            return verbMaker([1, false, 0, {"future":"valdr", "command":"val", "yo":"valg"}, [["be worth", "being worth", "been worth", "was worth", "were worth"], ["cost", "costing", "cost", "costed", "costed"]]]);
         case "acostarse":
-            return [0, true, 3, {}, [["go to bed", "going to bed", "gone to bed", "went to bed"]]];
+            return verbMaker([0, true, 3, {}, [["go to bed", "going to bed", "gone to bed", "went to bed"]]]);
         case "adquirir":
-            return [2, false, 0, {"boot":"adquier"}, [["buy", "buying", "bought", "bought"], ["acquire", "acquiring", "acquired", "acquired"]]];
+            return verbMaker([2, false, 0, {"boot":"adquier"}, [["buy", "buying", "bought", "bought"], ["acquire", "acquiring", "acquired", "acquired"]]]);
         case "atraer":
-            return [1, false, 0, {"yo":"atraig", "participle":"atraído", "gerund":"atrayendo", "pret":["atraje", "atrajiste", "atrajo", "atrajimos", "atrajeron"]}, [["attract", "attracting", "attracted", "attracted"]]];
+            return verbMaker([1, false, 0, {"yo":"atraig", "participle":"atraído", "gerund":"atrayendo", "pret":["atraje", "atrajiste", "atrajo", "atrajimos", "atrajeron"]}, [["attract", "attracting", "attracted", "attracted"]]]);
         case "conseguir":
-            return [2, false, 2, {"yo":"consig"}, [["obtain", "obtaining", "obtained", "obtained"], ["get", "getting", "gotten", "got"]]];
+            return verbMaker([2, false, 2, {"yo":"consig"}, [["obtain", "obtaining", "obtained", "obtained"], ["get", "getting", "gotten", "got"]]]);
         case "construir":
-            return [2, false, 0, {"boot":"contruy", "gerund":"construyendo"}, [["construct", "constructing", "constructed", "constructed"], ["build", "building", "built", "built"]]];
+            return verbMaker([2, false, 0, {"boot":"contruy", "gerund":"construyendo"}, [["construct", "constructing", "constructed", "constructed"], ["build", "building", "built", "built"]]]);
         case "despedir":
-            return [2, false, 2, {}, [["fire", "firing", "fired", "fired"]]];
+            return verbMaker([2, false, 2, {}, [["fire", "firing", "fired", "fired"]]]);
         case "divertirse":
-            return [2, true, 1, {}, [["have fun", "having fun", "had fun", "had fun"]]];
+            return verbMaker([2, true, 1, {}, [["have fun", "having fun", "had fun", "had fun"]]]);
         case "escoger":
-            return [1, false, 0, {"yo":"escoj"}, [["choose", "choosing", "chosen", "chose"], ["select", "selecting", "selected", "selected"]]];
+            return verbMaker([1, false, 0, {"yo":"escoj"}, [["choose", "choosing", "chosen", "chose"], ["select", "selecting", "selected", "selected"]]]);
         case "forzar":
-            return [0, false, 3, {}, [["force", "forcing", "forced", "forced"]]];
+            return verbMaker([0, false, 3, {}, [["force", "forcing", "forced", "forced"]]]);
         case "freír":
-            return [2, false, 2, {"boot":"frí", "participle":["frito", "freído"], "future":"freir", "gerund":"friendo"}, [["fry", "frying", "fried", "fried"]]];
+            return verbMaker([2, false, 2, {"boot":"frí", "participle":["frito", "freído"], "future":"freir", "gerund":"friendo"}, [["fry", "frying", "fried", "fried"]]]);
         case "elegir":
-            return [2, false, 2, {"yo":"elij"}, [["choose", "choosing", "chosen", "chose"], ["select", "selecting", "selected", "selected"]]];
+            return verbMaker([2, false, 2, {"yo":"elij"}, [["choose", "choosing", "chosen", "chose"], ["select", "selecting", "selected", "selected"]]]);
         case "medir":
-            return [2, false, 2, {}, [["measure", "measuring", "measured", "measured"]]];
+            return verbMaker([2, false, 2, {}, [["measure", "measuring", "measured", "measured"]]]);
         case "morir":
-            return [2, false, 3, {"participle":"muerto"}, [["die", "dying", "died", "died"]]];
+            return verbMaker([2, false, 3, {"participle":"muerto"}, [["die", "dying", "died", "died"]]]);
         case "ofrecer":
-            return [1, false, 0, {"yo":"ofrezc"}, [["offer", "offering", "offered", "offered"]]];
+            return verbMaker([1, false, 0, {"yo":"ofrezc"}, [["offer", "offering", "offered", "offered"]]]);
         case "portarse":
-            return [0, true, 0, {}, [["behave", "behaving", "behaved", "behaved"]]];
+            return verbMaker([0, true, 0, {}, [["behave", "behaving", "behaved", "behaved"]]]);
         case "producir":
-            return [2, false, 0, {"yo":"produzc", "pret":["produje", "produjiste", "produjo", "produjimos", "produjeron"]}, [["produce", "producing", "produced", "produced"]]];
+            return verbMaker([2, false, 0, {"yo":"produzc", "pret":["produje", "produjiste", "produjo", "produjimos", "produjeron"]}, [["produce", "producing", "produced", "produced"]]]);
         case "referir":
-            return [2, false, 1, {}, [["refer", "referring", "referred", "referred"]]];
+            return verbMaker([2, false, 1, {}, [["refer", "referring", "referred", "referred"]]]);
         case "reñir":
-            return [2, false, 2, {"pret":["reñí", "reñiste", "riñó", "reñimos", "riñeron"], "gerund":"riñendo"}, [["scold", "scolding", "scolded", "scolded"]]];
+            return verbMaker([2, false, 2, {"pret":["reñí", "reñiste", "riñó", "reñimos", "riñeron"], "gerund":"riñendo"}, [["scold", "scolding", "scolded", "scolded"]]]);
         case "sentarse":
-            return [0, true, 1, {}, [["sit", "sitting", "sat", "sat"]]];
+            return verbMaker([0, true, 1, {}, [["sit", "sitting", "sat", "sat"]]]);
         case "sonreír":
-            return [2, false, 2, {"future":"sonreir", "participle":"sonreído", "boot":"sonrí", "gerund":"sonriendo"}, [["smile", "smiling", "smiled", "smiled"]]];
+            return verbMaker([2, false, 2, {"future":"sonreir", "participle":"sonreído", "boot":"sonrí", "gerund":"sonriendo"}, [["smile", "smiling", "smiled", "smiled"]]]);
         case "sentirse":
-            return [2, true, 1, {}, [["feel", "feeling", "felt", "felt"]]];
+            return verbMaker([2, true, 1, {}, [["feel", "feeling", "felt", "felt"]]]);
         case "sugerir":
-            return [2, false, 1, {}, [["suggest", "suggesting", "suggested", "suggested"]]];
+            return verbMaker([2, false, 1, {}, [["suggest", "suggesting", "suggested", "suggested"]]]);
         case "torcer":
-            return [1, false, 3, {"yo":"tuerz", "participle":["torcido", "tuerto"]}, [["twist", "twisting", "twisted", "twisted"]]];
+            return verbMaker([1, false, 3, {"yo":"tuerz", "participle":["torcido", "tuerto"]}, [["twist", "twisting", "twisted", "twisted"]]]);
         case "vestirse":
-            return [2, true, 2, {}, [["get dressed", "getting dressed", "gotten dressed", "got dressed"]]];
+            return verbMaker([2, true, 2, {}, [["get dressed", "getting dressed", "gotten dressed", "got dressed"]]]);
         default:
             return null;
     }
