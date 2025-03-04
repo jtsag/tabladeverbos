@@ -1,15 +1,55 @@
 var sujeto; // Subject the chart is set to
 var level; // The Spanish level that guides the verb list
 
+// Set up refreshing logic
+document.addEventListener('DOMContentLoaded', function() {
+    init();
+    loadData();
+    setUpListeners();
+})
+
 function init() {
-    changeSubject(); // Initialize sujeto to a random value
+    changeSubject(suj=-1, save=false); // Initialize sujeto to a random value
     level = 5; // Set default to Spanish 5
 }
 
-// Randomly change the subject the chart is set to
-function changeSubject() {
+function setUpListeners() {
+    // Set up event listeners for saving data
+    for(const field of text_fields) {
+        document.getElementById(field).addEventListener("blur", function(){console.log("text save"); saveData();});
+    }
+    document.getElementById("verbSelector").addEventListener("input", function(){console.log("select save"); saveData();});
+}
 
-    sujeto = Math.floor(Math.random() * 5);
+function loadData() {
+    const data = JSON.parse(localStorage.getItem('inputs'));
+    if(!data) return;
+    for(const field of text_fields) {
+        document.getElementById(field).value = data[field + "_text"];
+        document.getElementById(field).style.color = data[field + "_color"];
+    }
+    changeSubject(data.suj, save=false);
+    if(data.level == 6) switchLevel(save=false);
+    document.getElementById("verbSelector").value = data.verb;
+}
+
+function saveData() {
+    const data = {};
+    for(const field of text_fields) {
+        data[field + "_text"] = document.getElementById(field).value;
+        data[field + "_color"] = document.getElementById(field).style.color;
+    }
+    data.suj = sujeto;
+    data.level = level;
+    data.verb = document.getElementById("verbSelector").value;
+    console.log(data)
+    localStorage.setItem('inputs', JSON.stringify(data))
+}
+
+// Randomly change the subject the chart is set to (or to given subject)
+function changeSubject(suj=-1, save=true) {
+
+    sujeto = suj==-1? Math.floor(Math.random() * 5) : suj;
     switch(sujeto) {
         case 0:
             document.getElementById("sujeto").value = "sujeto--yo";
@@ -29,11 +69,14 @@ function changeSubject() {
         default:
             break;
     }
+    if(save) {console.log("r0ll save"); saveData();}
 }
 
 // Check the chart and output feedback
 function checkChart() {
     getSolution(sujeto);
+    console.log("check save");
+    saveData();
 }
 
 // Clear all the cells
@@ -59,10 +102,13 @@ function clearScreen() {
             document.getElementById(order[i] + "_ingles").style.color = "black";
         }
     }
+
+    console.log('clear save')
+    saveData();
 }
 
 // Toggle between the verb selector modes
-function switchLevel() {
+function switchLevel(save=true) {
     if(level == 5) {
         level = 6;
         toggleVerb(SP6_VERBS);
@@ -72,6 +118,8 @@ function switchLevel() {
         toggleVerb(SP5_VERBS);
         document.getElementById("level").value = "Spanish 5";
     }
+
+    if(save) {console.log('level switch save'); saveData(); }
 }
 
 // Internal method to change the verb dropdown selection
