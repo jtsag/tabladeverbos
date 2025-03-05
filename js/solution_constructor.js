@@ -438,6 +438,10 @@ function getSolution(sujeto) {
         var span_ans = document.getElementById(span_name).value;
         var eng_ans = document.getElementById(eng_name).value;
         
+        document.getElementById(span_name).style.color = "black"
+        if(i != 21)
+            document.getElementById(eng_name).style.color = "black"
+
         span_ans = span_ans == null? "" : span_ans.toLowerCase().trim();
         eng_ans = eng_ans == null? "" : eng_ans.toLowerCase().trim();
 

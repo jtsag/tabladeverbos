@@ -16,9 +16,9 @@ function init() {
 function setUpListeners() {
     // Set up event listeners for saving data
     for(const field of text_fields) {
-        document.getElementById(field).addEventListener("blur", function(){console.log("text save"); saveData();});
+        document.getElementById(field).addEventListener("blur", saveData);
     }
-    document.getElementById("verbSelector").addEventListener("input", function(){console.log("select save"); saveData();});
+    document.getElementById("verbSelector").addEventListener("input", saveData);
 }
 
 function loadData() {
@@ -42,7 +42,6 @@ function saveData() {
     data.suj = sujeto;
     data.level = level;
     data.verb = document.getElementById("verbSelector").value;
-    console.log(data)
     localStorage.setItem('inputs', JSON.stringify(data))
 }
 
@@ -69,13 +68,12 @@ function changeSubject(suj=-1, save=true) {
         default:
             break;
     }
-    if(save) {console.log("r0ll save"); saveData();}
+    if(save) {saveData();}
 }
 
 // Check the chart and output feedback
 function checkChart() {
     getSolution(sujeto);
-    console.log("check save");
     saveData();
 }
 
@@ -103,7 +101,6 @@ function clearScreen() {
         }
     }
 
-    console.log('clear save')
     saveData();
 }
 
@@ -119,7 +116,7 @@ function switchLevel(save=true) {
         document.getElementById("level").value = "Spanish 5";
     }
 
-    if(save) {console.log('level switch save'); saveData(); }
+    if(save) {saveData(); }
 }
 
 // Internal method to change the verb dropdown selection
