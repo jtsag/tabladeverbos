@@ -22,7 +22,7 @@ function setUpListeners() {
 }
 
 function loadData() {
-    const data = JSON.parse(localStorage.getItem('inputs'));
+    const data = JSON.parse(sessionStorage.getItem('inputs'));
     if(!data) return;
     for(const field of text_fields) {
         document.getElementById(field).value = data[field + "_text"];
@@ -42,7 +42,7 @@ function saveData() {
     data.suj = sujeto;
     data.level = level;
     data.verb = document.getElementById("verbSelector").value;
-    localStorage.setItem('inputs', JSON.stringify(data))
+    sessionStorage.setItem('inputs', JSON.stringify(data))
 }
 
 // Randomly change the subject the chart is set to (or to given subject)
