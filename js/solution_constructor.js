@@ -205,7 +205,7 @@ function getSolution(sujeto) {
         imp_subj = reflexive_pronouns[sujeto] + " " + imp_subj;
     }
     if(sujeto == NOSOTROS) {
-        if(attr.endingType == AR) {
+        if(attr.endingType == AR && verbo != "andar") {
             imp_subj = imp_subj.substring(0, imp_subj.length - 1) + "á";
         } else {
             imp_subj = imp_subj.substring(0, imp_subj.length - 1) + "é";
