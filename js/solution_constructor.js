@@ -201,15 +201,10 @@ function getSolution(sujeto) {
     var imp_subj = getEllos(stem, attr, 4);
     imp_subj = imp_subj.substring(0, imp_subj.length - 3);
     if(attr.isReflexive) {
-        // imp_subj = imp_subj.substring(3);
         imp_subj = reflexive_pronouns[sujeto] + " " + imp_subj;
     }
     if(sujeto == NOSOTROS) {
-        if(attr.endingType == AR && verbo != "andar") {
-            imp_subj = imp_subj.substring(0, imp_subj.length - 1) + "á";
-        } else {
-            imp_subj = imp_subj.substring(0, imp_subj.length - 1) + "é";
-        }
+        imp_subj = addAccent(imp_subj + " ").substring(0, imp_subj.length); // Add accent to last vowel
     }
     spanish.push([imp_subj + imp_subj_endings[0][sujeto], imp_subj + imp_subj_endings[1][sujeto]]);
 
