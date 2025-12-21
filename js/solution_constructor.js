@@ -90,7 +90,7 @@ function getSolution(sujeto) {
         }
     }
     if(attr.isReflexive) {
-        pres = reflexive_pronouns[sujeto] + " "+ pres;
+        pres = reflexive_pronouns[sujeto] + " " + pres;
     }
     spanish.push(pres);
 
@@ -194,17 +194,17 @@ function getSolution(sujeto) {
         spanish.push("habr" + imp_endings[1][sujeto] + " " + part);
     }
 
-    //pres subj :,(
+    //pres subj
     spanish.push(getPresSubj(stem, attr, sujeto));
 
     //imp subj
-    var imp_subj = getEllos(stem, attr, 4);
+    var imp_subj = getEllos(stem, attr, ELLOS);
     imp_subj = imp_subj.substring(0, imp_subj.length - 3);
     if(attr.isReflexive) {
         imp_subj = reflexive_pronouns[sujeto] + " " + imp_subj;
     }
     if(sujeto == NOSOTROS) {
-        imp_subj = addAccent(imp_subj + " ").substring(0, imp_subj.length); // Add accent to last vowel
+        imp_subj = addAccent(imp_subj + " ").substring(0, imp_subj.length);
     }
     spanish.push([imp_subj + imp_subj_endings[0][sujeto], imp_subj + imp_subj_endings[1][sujeto]]);
 
@@ -548,7 +548,7 @@ function addAccent(word) {
 function getPresSubj(stem, attr, sujeto1) {
     var pres_subj;
     var opp = attr.endingType == AR? 1:0;
-    let suj = sujeto1 == 0? 2:sujeto1;
+    let suj = sujeto1 == YO? 2:sujeto1;
     if(attr.specialForms["subj"] != null) {
         return attr.specialForms["subj"][suj];
     }
@@ -626,7 +626,7 @@ function getPresSubj(stem, attr, sujeto1) {
 // Gets the stem for the third person preterite conjugation and attaches the correct ending based on plural or singular
 function getEllos(stem, attr, sujeto1) {
     var pret;
-    var idx = sujeto1 == 2? 3:6;
+    var idx = sujeto1 == EL? 3:6;
     var suj_idx = attr.endingType == AR? 0:1;
     if(attr.endingType == IR) {
         pret = stemChange(stem, attr.stemChangeType, true) + pret_endings[suj_idx][sujeto1];
@@ -667,14 +667,14 @@ function getYo(stem, attr) {
 
 // Stem change the given verb stem
 function stemChange(stem, type, oneLetter) {
-    if(type == 0) {
+    if(type == NO_SC) {
         return stem;
     }
     var tbr;
     var i;
     for(i = stem.length - 1; i >= 0; i--) {
         if(stem.substring(i, i+1) == "e") {
-            if(type == 1) {
+            if(type == E_IE) {
                 if(oneLetter) {
                     tbr = stem.substring(0,i) + "i";
                     break;
@@ -682,12 +682,12 @@ function stemChange(stem, type, oneLetter) {
                     tbr = stem.substring(0,i) + "ie";
                     break
                 }
-            } else if(type == 2) {
+            } else if(type == E_I) {
                 tbr = stem.substring(0,i) + "i";
                 break;
             }
         } else if(stem.substring(i, i+1) == "o") {
-            if(type == 3) {
+            if(type == O_UE) {
                 if(oneLetter) {
                     tbr = stem.substring(0,i) + "u";
                     break;
